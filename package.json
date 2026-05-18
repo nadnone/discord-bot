@@ -1,0 +1,9 @@
+{
+  "main": "main.js",
+  "type": "module",
+  "dependencies": {
+    "discord-api-types": "^0.38.47",
+    "discord.js": "^14.26.4",
+    "npm": "^11.14.1"
+  }
+}
