@@ -7,10 +7,10 @@ export default class Address_checker {
     constructor() {
 
         this.blacklist = []
-        this.init();
+        this._init();
     }
     
-    async init()
+    async _init()
     {
          for (let i = 0; i < blacklist_links.length; i++) {
         

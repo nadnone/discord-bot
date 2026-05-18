@@ -1,10 +1,9 @@
-import { ActivityType } from "discord.js";
+import { ActivityType } from "discord-api-types/v10"
 
-export default class Presence {
+export default class ActivityPresence {
 
     constructor(client) {
         this.client = client;
-        this.set('Attend un ordre des vizirs', ActivityType.Watching)
     }
 
     set(nom, type) {
