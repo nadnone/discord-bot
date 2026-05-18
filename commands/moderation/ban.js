@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export default {
 	data: new SlashCommandBuilder().setName('ban')
-			.setDescription("Bannir un membre membre (experimental)")
+			.setDescription("Bannir un membre (experimental)")
 			.addUserOption(option =>
 				option.setName("cible")
 					.setDescription("Le membre que vous vous bannir")

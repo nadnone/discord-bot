@@ -68,14 +68,15 @@ const rest = new REST().setToken(config.token);
 
 client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
+    if (!interaction.memberPermissions.has("BanMembers")) return;
 
     for (let i = 0; i < commands.length; i++) {
         const cmd = commands[i];
         
         if (interaction.commandName === cmd.data.toJSON().name)
         {
-            if (!interaction.memberPermissions.has("BanMembers")) return;
             cmd.execute(interaction);
+            return;
         }
 
     }

@@ -35,14 +35,16 @@ export default {
 
 				msgs.forEach(async (msg) => {
 
-					if (msg == null)
+					if (msg == null) {
+						interaction.reply("Messages supprimés");						
 						clearInterval(interval);
+					}
 					msg.delete();
 				});
 
 			});
 			
-		}, 5000);
+		}, 1000);
 		
 	
 	},

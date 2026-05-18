@@ -5,7 +5,8 @@ RUN apk add git nodejs npm
 
 RUN mkdir /app
 RUN cd /app && git clone https://github.com/nadnone/discord-bot.git
+RUN cd /app/discord-bot/ && echo "config/" > .gitignore
 
 WORKDIR /app/discord-bot/
 
-CMD git pull && npm install && node main.js
+CMD git fetch origin && git reset --hard origin/main && npm install && node main.js
