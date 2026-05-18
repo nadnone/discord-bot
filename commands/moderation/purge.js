@@ -6,13 +6,11 @@ export default {
 			.setDescription("Purge les messages d'un membre")
 			.addUserOption((option) =>
 				option.setName("cible")
-					.setDescription("Le membre que vous vous purger")
+					.setDescription("Le membre que vous voulez purger")
 					.setRequired(true)
 			),
 
 	async execute(interaction) {
-
-		await interaction.reply('Scanning of messages...');
 
 
 		const interval = setInterval(async () => {
@@ -27,25 +25,24 @@ export default {
 					cache: false
 				}).then(async (msg) => await msg.filter(m => m.author.id === interaction.options.getUser("cible").id))
 				.catch((e) => {
-
+		
 					console.log(e);
-					clearInterval(interval)
-					
+					return
 				})
 
 				msgs.forEach(async (msg) => {
-
-					if (msg == null) {
-						interaction.reply("Messages supprimés");						
-						clearInterval(interval);
-					}
-					msg.delete();
+					await msg.delete().catch(e => console.log(`Erreur code: ${e.code}`));
 				});
 
+			
+				if (msgs.size < 1) 
+				{
+					return
+				}
 			});
 			
-		}, 1000);
+		}, 5500);
 		
-	
+		await interaction.reply('Suppressions des messages...');
 	},
 };

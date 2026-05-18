@@ -1,27 +1,40 @@
 import fs, { readFileSync } from 'node:fs';
 import path, { dirname } from 'node:path';
 import { Client, REST, GatewayIntentBits, Events } from 'discord.js';
-import { Routes } from 'discord-api-types/v10';
+import { ActivityType, Routes } from 'discord-api-types/v10';
 import config from './config/config.json' with {type: "json"}
+import Presence from './Presence.js';
 
-const client = new Client({ intents: [
-		GatewayIntentBits.Guilds,
+
+let activityPresence = null;
+let commands = [] 
+
+
+const client = new Client({ 
+    intents: [
+        GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMembers,
-    ] });
+    ],
+    presence: {
+        status: 'online', // 'online', 'idle' (inactif), 'dnd' (ne pas déranger), 'invisible'
+        activities: [{
+            name: 'Attend un ordre des vizirs',
+            type: ActivityType.Watching 
+        }]
+    }
+});
 
 client.once(Events.ClientReady, (readyClient) => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    activityPresence = new Presence(client);
+    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
 
-let commands = [] 
 
 const foldersPath = path.join(import.meta.dirname, "commands");
-
 const commandFolders = fs.readdirSync(foldersPath);
-
 for (const folder of commandFolders) {
 
 	const commandsPath = path.join(foldersPath, folder);
@@ -55,9 +68,10 @@ const rest = new REST().setToken(config.token);
             cmds.push(cmd);
         }
 
-        const data = await await rest.put(Routes.applicationCommands(config.clientId), { body: cmds });
+        const data = await rest.put(Routes.applicationCommands(config.clientId), { body: cmds });
 
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+
 	} catch (error) {
 
         console.error(error);
@@ -65,24 +79,26 @@ const rest = new REST().setToken(config.token);
 })();
 
 
-
 client.on(Events.InteractionCreate, async (interaction) => {
-	if (!interaction.isChatInputCommand()) return;
-    if (!interaction.memberPermissions.has("BanMembers")) return;
+	if (!interaction.isChatInputCommand()) return; // si pas une slashcommand
+    if (!interaction.memberPermissions.has("BanMembers")) return; // si membre des gens qui peuvent bannirs
 
     for (let i = 0; i < commands.length; i++) {
+
         const cmd = commands[i];
         
         if (interaction.commandName === cmd.data.toJSON().name)
         {
-            cmd.execute(interaction);
+            activityPresence.set('Entrain de travailler..', ActivityType.Playing);
+            await cmd.execute(interaction);
             return;
         }
 
     }
-    
 
 });
+
+
 
 
 client.login(config.token);
