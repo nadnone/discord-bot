@@ -2,6 +2,7 @@ import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
 
 export default {
+	permissions: "moderators",
 	data: new SlashCommandBuilder().setName('ban')
 			.setDescription("Bannir un membre (experimental)")
 			.addUserOption(option =>
@@ -17,10 +18,11 @@ export default {
 
 	async execute(interaction) {
 
-		await interaction.reply('Ba-ba-ba ba-ba-ba BANNED !');
 		
 		const cible = interaction.options.getUser('cible')
 		const motif = interaction.options.getString('raison');
+
+		await interaction.reply(`${cible} Désolé mon gars... mais la sortie est par là. (motif: ${motif})`);
 
 		await interaction.guild.members.fetch((member) => {
 
@@ -35,6 +37,8 @@ export default {
 			}
 
 		});
+
+		await interaction.followUp("Ba-ba-ba ba-ba-ba BANNED !");
 
 	},
 };

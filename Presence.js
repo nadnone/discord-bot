@@ -4,7 +4,7 @@ export default class Presence {
 
     constructor(client) {
         this.client = client;
-        this.set('attend un ordre des vizirs', ActivityType.Watching)
+        this.set('Attend un ordre des vizirs', ActivityType.Watching)
     }
 
     set(nom, type) {

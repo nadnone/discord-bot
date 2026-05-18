@@ -2,6 +2,7 @@ import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
 
 export default {
+	permissions: "moderators",
 	data: new SlashCommandBuilder().setName('purge')
 			.setDescription("Purge les messages d'un membre")
 			.addUserOption((option) =>
@@ -12,8 +13,9 @@ export default {
 
 	async execute(interaction) {
 
+		await interaction.reply('Suppressions des messages...');
 
-		const interval = setInterval(async () => {
+		const interval = await setInterval(async () => {
 			
 			const channels = await interaction.guild.channels.fetch();
 			const textChannels = await channels.filter(chan => chan.type === ChannelType.GuildText);
@@ -27,22 +29,23 @@ export default {
 				.catch((e) => {
 		
 					console.log(e);
+					clearInterval(interval)
 					return
 				})
 
 				msgs.forEach(async (msg) => {
-					await msg.delete().catch(e => console.log(`Erreur code: ${e.code}`));
+					await msg.delete().catch(e => console.log(`Erreur code: ${e.code} -> purge.js`));
 				});
 
 			
 				if (msgs.size < 1) 
 				{
-					return
+					clearInterval(interval)
 				}
 			});
 			
 		}, 5500);
 		
-		await interaction.reply('Suppressions des messages...');
+
 	},
 };

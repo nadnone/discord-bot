@@ -1,14 +1,15 @@
-import fs, { readFileSync } from 'node:fs';
+import fs, { link, readFileSync } from 'node:fs';
 import path, { dirname } from 'node:path';
 import { Client, REST, GatewayIntentBits, Events } from 'discord.js';
 import { ActivityType, Routes } from 'discord-api-types/v10';
 import config from './config/config.json' with {type: "json"}
 import Presence from './Presence.js';
-
+import Address_checker from './Events/dnsLookup.js';
 
 let activityPresence = null;
 let commands = [] 
 
+const address_checker = new Address_checker();
 
 const client = new Client({ 
     intents: [
@@ -78,23 +79,40 @@ const rest = new REST().setToken(config.token);
 	}
 })();
 
+client.on(Events.MessageCreate, async (interaction) => {
+
+    address_checker.check(interaction, activityPresence);
+    
+});
 
 client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return; // si pas une slashcommand
-    if (!interaction.memberPermissions.has("BanMembers")) return; // si membre des gens qui peuvent bannirs
+
+    let isModerator = false; // par défaut c'est un random
+
+    if (interaction.memberPermissions.has("BanMembers")) {
+        isModerator = true;
+    }; // si l'auteur est membre des gens qui peuvent bannirs
 
     for (let i = 0; i < commands.length; i++) {
 
         const cmd = commands[i];
         
-        if (interaction.commandName === cmd.data.toJSON().name)
+        
+        if (interaction.commandName === cmd.data.toJSON().name && isModerator)
         {
-            activityPresence.set('Entrain de travailler..', ActivityType.Playing);
+            activityPresence.set('Entrain de servir...', ActivityType.Playing);
             await cmd.execute(interaction);
-            return;
+            return
         }
-
+        else if (interaction.commandName === cmd.data.toJSON().name && (cmd.permissions === "users" || isModerator))
+        {
+            activityPresence.set('Entrain de travailler...', ActivityType.Playing);
+            await cmd.execute(interaction);
+            return
+        }
     }
+    activityPresence.set("En attente d'un nouvel ordre", ActivityType.Watching);
 
 });
 
