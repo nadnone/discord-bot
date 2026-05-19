@@ -3,13 +3,15 @@ import { ActivityType } from "discord.js";
 import blacklist_links from '../config/blacklist.json' with {type: "json"}
 import whitelist_list from '../config/whitelist.json' with {type: "json"}
 import warnUser from "../tools/warn.js";
+import fs from "node:fs";
+import { BLACKLISTFILE, WHITELISTFILE } from "../tools/constants.js";
 
 export default class Address_checker {
 
     constructor() {
 
-        this.blacklist = []
-        this.whitelist = []
+        this.blacklist = JSON.parse(fs.readFileSync(BLACKLISTFILE));
+        this.whitelist = JSON.parse(fs.readFileSync(WHITELISTFILE));
         this._init();
     }
     

@@ -1,7 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { PERMISSIONS, WARNJSONFILE } from '../../tools/constants.js';
-import warnslist from '../../data/warns.json' with {type: "json"}
 import warnUser from '../../tools/warn.js';
 import pardon from '../../tools/pardon.js';
 import fs from 'node:fs';

@@ -8,7 +8,7 @@ export default class QuoiFeurDetector {
 
     check(interaction, presence) {
 
-        if (interaction.content.match(/[quoi|Quoi]/) != null && --this.cooldown < 0) 
+        if (interaction.content.match(/quoi|Quoi/) != null && --this.cooldown < 0) 
         {
             interaction.reply("FEUR !");
             presence.set("S'amuse", ActivityType.Playing);

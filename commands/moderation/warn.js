@@ -1,7 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
 import { PERMISSIONS } from '../../tools/constants.js';
-import warnslist from '../../data/warns.json' with {type: "json"}
 import { exec } from 'node:child_process';
 import warnUser from '../../tools/warn.js';
 

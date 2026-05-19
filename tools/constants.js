@@ -6,5 +6,10 @@ export const PERMISSIONS = {
 
 export const WARNJSONFILE = "./data/warns.json";
 export const DEVELOPERSJSONFILE = "./config/developers.json";
+export const LOGCOMMITSFILE = "./data/commits.json";
+export const BLACKLISTFILE = "./config/blacklist.json"
+export const WHITELISTFILE = "./config/whitelist.json"
+
+export const UPDATES_ROOMS_NAME = "lechatfouettard-updates"
 
 export const WARNS_BEFORE_BAN = 5;

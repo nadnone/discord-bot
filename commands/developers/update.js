@@ -23,6 +23,6 @@ export default {
         });
         // le docker devra automatiquement redémarrer
         logout(interaction.client);
-        
+        main();
     },
 };
