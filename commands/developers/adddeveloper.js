@@ -1,10 +1,9 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DEVELOPERSJSONFILE, PERMISSIONS } from '../../tools/constants.js';
 import { logout, main } from '../../main.js';
 import { exec } from 'node:child_process';
 import { stderr, stdout } from 'node:process';
-
-import developer_list from '../../config/developers.json' with {type: "json"}
+import fs from 'node:fs';
 
 export default {
     permissions: PERMISSIONS.DEVELOPERS,
@@ -20,6 +19,7 @@ export default {
       
     
 		const cible = interaction.options.getUser('operateur')
+        const developer_list = await fs.readFileSync(DEVELOPERSJSONFILE);
 
 
         if (developer_list.includes(cible.id))
@@ -30,15 +30,14 @@ export default {
 
         developer_list.push(cible.id.toString());
 
-        await exec(`echo ${JSON.stringify(developer_list)} > ./config/developers.json`, (error) => {
-
-            if (error) {
-                interaction.followUp("Erreur !")    
-                console.log(error.message);
-                return
-            }
-                
-        });
+        try {
+            await fs.writeFileSync(DEVELOPERSJSONFILE, JSON.stringify(developer_list));
+        }
+        catch (e) 
+        {
+            console.log(`Error code : ${e.code} -> adddevelopers.js`);
+        }
+    
 
         interaction.reply("J'ajoute ce membre :saluting_face:");
 

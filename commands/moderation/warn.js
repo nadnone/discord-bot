@@ -1,20 +1,22 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
 import { PERMISSIONS } from '../../tools/constants.js';
-import banUser from '../../tools/ban.js';
+import warnslist from '../../data/warns.json' with {type: "json"}
+import { exec } from 'node:child_process';
+import warnUser from '../../tools/warn.js';
 
 export default {
 	permissions: PERMISSIONS.MODERATORS,
-	data: new SlashCommandBuilder().setName('ban')
-			.setDescription("Bannir un membre (experimental)")
+	data: new SlashCommandBuilder().setName('warn')
+			.setDescription("warn un membre")
 			.addUserOption(option =>
 				option.setName("cible")
-					.setDescription("Le membre que vous voulez bannir")
+					.setDescription("Le membre que vous voulez warn")
 					.setRequired(true)
 			)
 			.addStringOption(option => 
 				option.setName("raison")
-					.setDescription("Le motif du ban")
+					.setDescription("Le motif du warn")
 					.setRequired(true)
 			),
 
@@ -24,11 +26,9 @@ export default {
 		const cible = interaction.options.getUser('cible')
 		const motif = interaction.options.getString('raison');
 
-		await interaction.reply(`${cible} Désolé mon gars... mais la sortie est par là. (motif: ${motif})`);
+		await warnUser(cible,motif, await interaction);
 
-		banUser(cible, motif, interaction);
-
-		await interaction.followUp("Ba-ba-ba ba-ba-ba BANNED !");
+		await interaction.reply(`${cible} Attention, je t'ai à l'oeil. (motif: ${motif})`);
 
 	},
 };

@@ -9,4 +9,7 @@ RUN cd /app/discord-bot/ && echo "config/" > .gitignore
 
 WORKDIR /app/discord-bot/
 
+RUN mkdir config && mkdir data
+RUN touch ./data/warns.json
+
 CMD git fetch origin && git reset --hard origin/main && npm install && node main.js

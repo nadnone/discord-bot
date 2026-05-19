@@ -1,6 +1,7 @@
 import { Resolver } from "node:dns";
 import { ActivityType } from "discord.js";
 import blacklist_links from '../config/blacklist.json' with {type: "json"}
+import warnUser from "../tools/warn.js";
 
 export default class Address_checker {
 
@@ -51,10 +52,11 @@ export default class Address_checker {
                         .replaceAll("^", "")
                         .trim()
         
-                                                        
+                                    
             if (rslt.includes(nude_link)) {
-                await interaction.reply("Lien bizarre detecté, message supprimé. U_u");
-                await interaction.delete();
+                await interaction.reply("Lien bizarre detecté, supprimé. U_u");
+                await warnUser(interaction.member, "Envoie des liens douteux", interaction);
+                return
             }
         }
 
