@@ -1,6 +1,7 @@
 import { Resolver } from "node:dns";
 import { ActivityType } from "discord.js";
 import blacklist_links from '../config/blacklist.json' with {type: "json"}
+import whitelist_list from '../config/whitelist.json' with {type: "json"}
 import warnUser from "../tools/warn.js";
 
 export default class Address_checker {
@@ -8,6 +9,7 @@ export default class Address_checker {
     constructor() {
 
         this.blacklist = []
+        this.whitelist = []
         this._init();
     }
     
@@ -23,6 +25,10 @@ export default class Address_checker {
             
             this.blacklist.push(await text.text())
 
+        }
+
+        for (const element of whitelist_list) {
+            this.whitelist.push(element);
         }
         
     }
@@ -42,22 +48,29 @@ export default class Address_checker {
 
         presence.set("Verifie un lien è_é", ActivityType.Watching);
 
+
+        let allowed = this.whitelist.filter((el) => nude_link.includes(el)).length > 0
+        if (allowed) return
+
+
         for (const el of this.blacklist)
         {
-            const rsltStr = await el.toString()
 
-            const rslt = rsltStr
-                        .replaceAll("|", "")
-                        .replaceAll("/", "")
-                        .replaceAll("^", "")
-                        .trim()
-        
-                                    
-            if (rslt.includes(nude_link)) {
-                await interaction.reply("Lien bizarre detecté, supprimé. U_u");
-                await warnUser(interaction.member, "Envoie des liens douteux", interaction);
-                return
-            }
+                const rsltStr = await el.toString()
+    
+                const rslt = rsltStr
+                            .replaceAll("|", "")
+                            .replaceAll("/", "")
+                            .replaceAll("^", "")
+                            .trim()
+            
+                            
+                if (rslt.includes(nude_link)) {
+                    await interaction.reply("Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.");
+                    await warnUser(interaction.member, "Envoie des liens douteux", interaction);
+                    await interaction.delete();
+                    return
+                }
         }
 
 

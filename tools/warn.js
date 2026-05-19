@@ -7,21 +7,18 @@ export default async function warnUser(cible, motif, interaction) {
 
     try
     {
-        const registre = await fs.readFileSync(WARNJSONFILE).filter(el => el.cible === cible.id.toString());
+        let list =  JSON.parse(await fs.readFileSync(WARNJSONFILE));
+        const registre = list.filter(el => el.cible === cible.id.toString());
 
-        let list = warnslist;
 
         if (registre.length >= WARNS_BEFORE_BAN)
         {
             await banUser(cible, "4x warn, donc ban", interaction);
 
-            list = await warnslist.filter(el => el.cible !== cible.id.toString());
+            list = await list.filter(el => el.cible !== cible.id.toString());
             await fs.writeFileSync(WARNJSONFILE, JSON.stringify(list));
             return
         }
-
-
-        list = warnslist;
 
         list.push(({
 			"cible": cible.id.toString(),
@@ -34,7 +31,7 @@ export default async function warnUser(cible, motif, interaction) {
     }
     catch (e)
     {
-        console.log(`Errore code: ${e.code} -> tools/warn.js`);
+        console.log(`Errore code: ${e} -> tools/warn.js`);
         
     }
 
