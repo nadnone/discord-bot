@@ -1,7 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { PERMISSIONS } from '../../tools/constants.js';
 
 export default {
-    permissions: "users",
+    permissions: PERMISSIONS.USERS,
 	data: new SlashCommandBuilder().setName('infos').setDescription('En savoir plus sur moi'),
 	async execute(interaction) {
 		await interaction.reply("Alors comme ca tu veux me stalk ? O_O");

@@ -1,8 +1,9 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
+import { PERMISSIONS } from '../../tools/constants.js';
 
 export default {
-	permissions: "moderators",
+	permissions: PERMISSIONS.MODERATORS,
 	data: new SlashCommandBuilder().setName('ban')
 			.setDescription("Bannir un membre (experimental)")
 			.addUserOption(option =>
