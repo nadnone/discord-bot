@@ -16,10 +16,10 @@ export default class CommitsLogger {
         
         const commitsData = JSON.parse(fs.readFileSync(LOGCOMMITSFILE));
 
-        exec("git log -n 1", async (error, stdout, stderr) => {
+        exec("git fetch https://github.com/nadnone/discord-bot.git && git log -n 1", async (error, stdout, stderr) => {
 
             if (error) {
-                console.log(stderr.message);
+                console.log(error.message);
             }
             else {
 
@@ -33,6 +33,7 @@ export default class CommitsLogger {
                 const lastcommit = commitsData.filter(el => el.title === title && el.description === description && el.author === author)
                 if (lastcommit.length > 0) 
                 {
+                    this.check_anyway = false;
                     return
                 }
 
@@ -44,9 +45,8 @@ export default class CommitsLogger {
 
                 const channels = await client.channels.cache.forEach(async (chan) => {
                     if (chan.name === UPDATES_ROOMS_NAME &&
-                        chan.type === ChannelType.GuildText &&
-                        chan.lastMessage != null)
-                    {
+                        chan.type === ChannelType.GuildText 
+                    ){
                             chan.send({embeds: [embed]})
                     }
                 });
