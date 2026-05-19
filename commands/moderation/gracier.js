@@ -5,36 +5,34 @@ import banUser from '../../tools/ban.js';
 
 export default {
 	permissions: PERMISSIONS.MODERATORS,
-	data: new SlashCommandBuilder().setName('ban')
-			.setDescription("Bannir un membre (experimental)")
+	data: new SlashCommandBuilder().setName('gracier')
+			.setDescription("Gracier un membre banni (experimental)")
 			.addUserOption(option =>
 				option.setName("cible")
-					.setDescription("Le membre que vous voulez bannir")
+					.setDescription("Le membre que vous voulez gracier")
 					.setRequired(true)
 			)
 			.addStringOption(option => 
 				option.setName("raison")
-					.setDescription("Le motif du ban")
+					.setDescription("Le motif de la grâce")
 					.setRequired(true)
 			),
 
 	async execute(interaction) {
 
-		try {
-			
+		try
+		{
 			const cible = interaction.options.getUser('cible')
 			const motif = interaction.options.getString('raison');
 	
-			await interaction.reply(`${cible} Désolé mon gars... mais la sortie est par là. (motif: ${motif})`);
+			await interaction.reply(`${cible} Je t'accorde la grâce du grand Chat. (motif: ${motif})`);
 	
-			banUser(cible, motif, interaction);
-	
-			await interaction.followUp("Ba-ba-ba ba-ba-ba BANNED !");
-			
-		} catch (e) {
-			console.log(`Erreur: ${e.message} -> ban.js`);
+			await interaction.guild.members.unban(cible, motif);
+		}
+		catch (e) 
+		{
+			console.log(`Erreur: ${e.message} -> gracier.js`);
 			
 		}
-
 	},
 };

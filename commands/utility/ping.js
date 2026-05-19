@@ -5,6 +5,13 @@ export default {
 	permissions: PERMISSIONS.USERS,
 	data: new SlashCommandBuilder().setName('ping').setDescription('Pour tester si je suis vivant'),
 	async execute(interaction) {
-		await interaction.reply('JE SUIS VIVANT (v1.0)!');
+
+		try {
+			await interaction.reply('JE SUIS VIVANT (v1.0)!');
+			
+		} catch (e) {
+			console.log(`Erreur : ${e.message} -> ping.js`);
+			
+		}
 	},
 };
