@@ -16,8 +16,7 @@ export default {
 
 		try {
 
-
-			await interaction.reply('Suppressions des messages...');
+			await interaction.deferReply();
 
 			const interval = await setInterval(async () => {
 				
@@ -32,15 +31,18 @@ export default {
 					}).then(async (msg) => await msg.filter(m => m.author.id === interaction.options.getUser("cible").id))
 					.catch((e) => {
 			
-						console.log(e);
+						console.log(`Erreur code : ${e.code} -> purge.js`);
 						clearInterval(interval)
-						return
 					})
+
+					if (msgs.size < 1) {
+						await interaction.followUp("Tâches terminée");
+					}
 					
 					msgs.forEach(async (msg) => {
 						await msg.delete().catch(e => {
 							console.log(`Erreur code: ${e.code} -> purge.js`)
-							return;
+							clearInterval(interval)
 						});
 					});
 
@@ -50,11 +52,10 @@ export default {
 						clearInterval(interval)
 					}
 				});
+
 				
-			}, 2500);
+			}, 2_500);
 			
-
-
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> purge.js`);
 			

@@ -11,7 +11,4 @@ RUN cd /app/discord-bot/ && echo "data/" >> .gitignore
 
 WORKDIR /app/discord-bot/
 
-RUN mkdir config && mkdir data
-RUN echo "[]" >  /app/discord-bot/data/warns.json
-
 CMD git fetch origin && git reset --hard origin/main && npm install && node main.js

@@ -5,7 +5,8 @@ services:
       dockerfile: Dockerfile
     image: discord-bot:latest
     container_name: discord-bot
-    restart: always
+    restart: unless-stopped
     network_mode: host
     volumes:
        - $DISK/discord-bot/:/app/discord-bot/config/:Z
+       - $DISK/discord-bot/data/:/app/discord-bot/data/:Z

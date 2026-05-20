@@ -3,7 +3,7 @@ import { stderr, stdout } from "node:process";
 import { exec } from 'child_process';
 import fs from 'node:fs';
 
-import { LOGCOMMITSFILE, UPDATES_ROOMS_NAME } from "../tools/constants.js";
+import { LOGCOMMITSFILE, UPDATES_ROOM_NAME } from "../tools/constants.js";
 
 export default class CommitsLogger {
 
@@ -44,7 +44,7 @@ export default class CommitsLogger {
 
 
                 const channels = await client.channels.cache.forEach(async (chan) => {
-                    if (chan.name === UPDATES_ROOMS_NAME &&
+                    if (chan.name === UPDATES_ROOM_NAME &&
                         chan.type === ChannelType.GuildText 
                     ){
                             chan.send({embeds: [embed]})

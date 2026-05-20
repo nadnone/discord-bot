@@ -12,7 +12,8 @@ export default {
     
         /* ne fonctionne que sur alpine linux X_X */
 
-        await exec(`apk update && apk upgrade`, (error) => {
+        // on update
+        await exec(`apk update && apk upgrade && git reset --hard origin/main`, (error) => {
 
             if (error) {
                 interaction.followUp("Erreur !")    
@@ -21,7 +22,8 @@ export default {
             }
                 
         });
-        // le docker devra automatiquement redémarrer
+
+        // on redémarre
         logout(interaction.client);
         main();
     },
