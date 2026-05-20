@@ -51,6 +51,7 @@ export default class CommitsLogger {
                     }
                 });
 
+                commitsData.clear(); // on efface pour n'avoir qu'un seul element
 
                 commitsData.push({
                     title: title,

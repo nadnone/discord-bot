@@ -8,7 +8,7 @@ import BotReady from './events/BotReady.js';
 import path from 'node:path';
 import Address_checker from './modules/Address_checker.js';
 import fs, { mkdirSync } from 'node:fs';
-import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API, BLACKLISTFILE, LOGCOMMITSFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
+import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
 
 export async function main() {
@@ -44,8 +44,7 @@ export async function main() {
     slashcmdMAnager.setCommands(cmdsloader.get_commands());
     slashcmdMAnager.eventLoop(client, presence);
     
-    const addr_checker = new Address_checker()
-    const msgManager = new MessagesManager(addr_checker);
+    const msgManager = new MessagesManager();
     msgManager.eventLoop(client, presence);
     
     client.login(config.token);
@@ -65,9 +64,11 @@ async function load_files() {
         let data = [];
 
         data.push({name: WARNJSONFILE, status: await fs.existsSync(WARNJSONFILE)});
-        data.push({name: WARNJSONFILE, status: await fs.existsSync(BLACKLISTFILE)});
+        data.push({name: BLACKLISTFILE, status: await fs.existsSync(BLACKLISTFILE)});
         data.push({name: WARNJSONFILE, status: await fs.existsSync(WHITELISTFILE)});
         data.push({name: LOGCOMMITSFILE, status: await fs.existsSync(LOGCOMMITSFILE)});
+        data.push({name: BLACKLISTSFWFILE, status: await fs.existsSync(BLACKLISTSFWFILE)});
+        data.push({name: SERVERSLISTFILE, status: await fs.existsSync(SERVERSLISTFILE)});
         data.push({name: ALLOWERBARDWORDSFILE, status: await fs.existsSync(ALLOWERBARDWORDSFILE)});
 
         for (const file of data) {

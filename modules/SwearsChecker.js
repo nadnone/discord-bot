@@ -1,35 +1,46 @@
 import { ActivityType } from "discord.js";
-import blacklist_links from '../config/blacklist.json' with {type: "json"}
-import whitelist_list from '../config/whitelist.json' with {type: "json"}
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API, BLACKLISTFILE } from "../tools/constants.js";
+import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR } from "../tools/constants.js";
 
 export default class SwearsChecker {
 
-    constructor() {
-
+    constructor(servers) {
+        this.servers = servers;
         this.allowedbWords = null;
         this.blacklist = null;
-        console.log(this.blacklist);
         this._init();
     }
 
     async _init() {
-        this.blacklist = await (await fetch(BADWORDS_LIST_API)).text()
-        this.blacklist = await this.blacklist.toString().split("\n");
+        this.blacklist_FR = await (await fetch(BADWORDS_LIST_API_FR)).text()
+        this.blacklist_EN = await (await fetch(BADWORDS_LIST_API_EN)).text()
+        
+        this.blacklist_FR = await this.blacklist_FR.toString().split("\n");
+        this.blacklist_EN = await this.blacklist_EN.toString().split("\n");
+
         this.allowedbWords = JSON.parse(await fs.readFileSync(ALLOWERBARDWORDSFILE));
         
     }
 
     async check(interaction, presence)
     {
+        const server = this.servers.find(s => s.id === interaction.guildId);
 
         let words = interaction.content.toLowerCase();
 
         words = words.trim().split(" ");
 
-        presence.set("Verifie un mot è_é", ActivityType.Watching);
+        if (server.language === "FR"){
+            presence.set("Verifie un mot è_é", ActivityType.Watching);
+            this.blacklist = this.blacklist_FR
+        }
+        else 
+        {
+            presence.set("Check a word è_é", ActivityType.Watching);
+            this.blacklist = this.blacklist_EN;
+        } 
+
 
         for (const word of words)
         {
@@ -39,10 +50,17 @@ export default class SwearsChecker {
             const allowed = await this.allowedbWords.filter(aw => aw === rslt.join(""))
             if (allowed.length > 0) continue
 
-            if (rslt.length > 0)
+            if (rslt.length > 0 && server.language === "FR")
             {
-                warnUser(interaction.member, "Insulte non familière detectée", interaction)
+                warnUser(interaction.member, `Innsulte non familière detectée ${word}`, interaction)
                 await interaction.reply("Une insulte = un warn (:");
+                await interaction.delete();
+                return;
+            }
+            else if (rslt.length > 0 && server.language === "EN")
+            {
+                warnUser(interaction.member, `A swear detected ${word}`, interaction)
+                await interaction.reply("A swear = a warn (:");
                 await interaction.delete();
                 return;
             }

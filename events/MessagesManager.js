@@ -2,14 +2,18 @@ import { Events } from "discord.js";
 import Address_checker from '../modules/Address_checker.js';
 import QuoiFeurDetector from "../modules/QuoiFeurDetector.js";
 import SwearsChecker from "../modules/SwearsChecker.js";
-
+import fs from 'node:fs';
+import { SERVERSLISTFILE } from "../tools/constants.js";
 
 export default class MessagesManager {
 
-    constructor(addr_checker) {
-        this.addr_checker = addr_checker;
-        this.quoifeurDetector = new QuoiFeurDetector();
-        this.swearsChecker = new SwearsChecker();
+    constructor() {
+
+        this.servers = JSON.parse(fs.readFileSync(SERVERSLISTFILE));
+
+        this.addr_checker = new Address_checker(this.servers);
+        this.quoifeurDetector = new QuoiFeurDetector(this.servers);
+        this.swearsChecker = new SwearsChecker(this.servers);
     }
 
     eventLoop(client, activityPresence) {

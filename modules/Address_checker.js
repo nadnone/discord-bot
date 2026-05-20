@@ -1,37 +1,40 @@
 import { ActivityType } from "discord.js";
-import blacklist_links from '../config/blacklist.json' with {type: "json"}
-import whitelist_list from '../config/whitelist.json' with {type: "json"}
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { BLACKLISTFILE, WHITELISTFILE } from "../tools/constants.js";
+import { BLACKLISTFILE, BLACKLISTSFWFILE, WHITELISTFILE } from "../tools/constants.js";
 
 export default class Address_checker {
 
-    constructor() {
-
-        this.blacklist = JSON.parse(fs.readFileSync(BLACKLISTFILE));
-        this.whitelist = JSON.parse(fs.readFileSync(WHITELISTFILE));
+    constructor(servers) {
+        this.servers = servers;
+        this.blacklist = [];
+        this.blacklist_sfw = [];
+        this.whitelist = null;
         this._init();
     }
     
-    async _init()
-    {
-         for (let i = 0; i < blacklist_links.length; i++) {
-        
-            const list = blacklist_links[i];
+    async _load_list(list_array, output) {
+            
+        for (const list of list_array) {
             
             let text = await fetch(list);
             if (!text.ok)
                 console.log(`${list} : fetch error`);
             
-            this.blacklist.push(await text.text())
-
+            output.push(await text.text())
         }
+    }
 
-        for (const element of whitelist_list) {
-            this.whitelist.push(element);
-        }
-        
+    async _init()
+    {
+
+        const blacklist_array = JSON.parse(fs.readFileSync(BLACKLISTFILE));
+        const blacklist_SFW_array = JSON.parse(fs.readFileSync(BLACKLISTSFWFILE));
+        this.whitelist = JSON.parse(fs.readFileSync(WHITELISTFILE));
+
+        this._load_list(blacklist_array, this.blacklist);
+        this._load_list(blacklist_SFW_array, this.blacklist_sfw);
+
     }
 
     async check(interaction, presence)
@@ -47,12 +50,25 @@ export default class Address_checker {
             .replaceAll("\/", "")
             .trim()
 
-        presence.set("Verifie un lien è_é", ActivityType.Watching);
+
+        const server = await this.servers.find(s => s.id === interaction.guildId);
+
+        if (server.langage === "FR")
+            presence.set("Verifie un lien è_é", ActivityType.Watching);
+        else 
+            presence.set("Looking a link è_é", ActivityType.Watching);
+
 
 
         let allowed = this.whitelist.filter((el) => nude_link.includes(el)).length > 0
         if (allowed) return
 
+
+        if (!server.NSFW)
+        {
+            this.blacklist = this.blacklist.concat(this.blacklist_sfw);
+            return
+        }
 
         for (const el of this.blacklist)
         {
@@ -66,9 +82,15 @@ export default class Address_checker {
                             .trim()
             
                             
-                if (rslt.includes(nude_link)) {
+                if (rslt.includes(nude_link) && server.language === "FR") {
                     await interaction.reply("Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.");
-                    await warnUser(interaction.member, "Envoie des liens douteux", interaction);
+                    await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction);
+                    await interaction.delete();
+                    return
+                }
+                else if (rslt.includes(nude_link) && server.language === "EN") {
+                    await interaction.reply("Not allowed link detected, if you think I'm wrong, please send a ticket.");
+                    await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interaction);
                     await interaction.delete();
                     return
                 }
