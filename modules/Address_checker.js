@@ -38,7 +38,7 @@ export default class Address_checker {
     async check(interaction, presence)
     {
 
-        let nude_link = interaction.content;
+        let nude_link = interaction.content.toLowerCase();
 
         if (!nude_link.match("https|http|ftp|ftps")) return; // si c'est pas un lien HTTP ou FTP on passe.
 
@@ -46,7 +46,7 @@ export default class Address_checker {
             .replace("http:", "")
             .replace("https:", "")
             .replaceAll("\/", "")
-            .trim();        
+            .trim()
 
         presence.set("Verifie un lien è_é", ActivityType.Watching);
 
