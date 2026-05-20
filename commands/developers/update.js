@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { GITHUB_REPOSITORY, PERMISSIONS } from '../../tools/constants.js';
 import { logout, main } from '../../main.js';
 import { exec } from 'node:child_process';
 
@@ -13,18 +13,23 @@ export default {
         /* ne fonctionne que sur alpine linux X_X */
 
         // on update
-        await exec(`apk update && apk upgrade && git reset --hard origin/main`, (error) => {
-
-            if (error) {
-                interaction.followUp("Erreur !")    
+        await exec(`apk update && apk upgrade && git fetch ${GITHUB_REPOSITORY} && git reset origin/main --hard && rm -rf ./node_modules && npm install`, (error) => {
+            if (!error) 
+            {
+                // on redémarre
+                logout(interaction.client);
+                main();
+            }
+            else if (error.code === 128)
+            {
+                interaction.followUp("Je suis déjà à jours");
+            }
+            else {
+                interaction.followUp(`Erreur: -> ${error.code}`)    
                 console.log(error.message);
-                return
             }
                 
         });
 
-        // on redémarre
-        logout(interaction.client);
-        main();
     },
 };

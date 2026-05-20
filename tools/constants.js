@@ -13,3 +13,5 @@ export const WHITELISTFILE = "./config/whitelist.json"
 export const UPDATES_ROOM_NAME = "lechatfouettard-updates"
 
 export const WARNS_BEFORE_BAN = 5;
+
+export const GITHUB_REPOSITORY = "https://github.com/nadnone/discord-bot.git"
