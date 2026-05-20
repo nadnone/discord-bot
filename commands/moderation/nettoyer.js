@@ -22,31 +22,45 @@ export default {
 
 			await interaction.deferReply();
 
+			let max = parseInt(interaction.options.getString("nombre"));
+
 			const channels = await interaction.guild.channels.fetch();
 			const textchannel = await interaction.channel
 			
-			const msgs = await textchannel.messages.fetch({
-				limit: parseInt(interaction.options.getString("nombre")),
-				cache: false
-			}).then(async (msg) => await msg.filter(m => m.author.id === interaction.options.getUser("cible").id))
-			.catch((e) => {
-				console.log(`Erreur code : ${e} -> purge.js`);
-			})
+			let interval = setInterval(async () => {
+				
+				let msgs = await textchannel.messages.fetch({
+					limit: 100,
+					cache: false 
+				})
+				
+				msgs = await msgs.filter(m => m.author.id === interaction.options.getUser("cible").id);
+				
+				if (msgs.size <= 0 || msgs == null) clearInterval(interval);
 
-			await msgs.forEach(async (msg) => {
-				await msg.delete().catch(e => {
-					console.log(`Erreur code: ${e} -> purge.js`)
+				await msgs.forEach(msg => {
+
+					if (max <= 0) {
+						clearInterval(interval);
+						return
+					} 
+					
+					if (msg != null)
+					{
+						msg.delete()
+						--max;
+					}
 				});
-			});
 
-	
+			}, 2_500);
+
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> purge.js`);
-			
 		}
 		finally {
-			interaction.followUp("Tâche terminée");
+			setTimeout(async () => await interaction.followUp("Tâches terminée"), 500);
 		}
+		
 		
 	},
 };
