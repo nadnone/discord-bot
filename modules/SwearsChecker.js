@@ -33,7 +33,7 @@ export default class SwearsChecker {
 
         for (const word of words)
         {
-            const rslt = await this.blacklist.filter(bw => bw === word);
+            const rslt = await this.blacklist.filter(bw => bw === word.toLowerCase());
             if (rslt.length < 1) continue
 
             const allowed = await this.allowedbWords.filter(aw => aw === rslt.join(""))
