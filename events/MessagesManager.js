@@ -20,6 +20,9 @@ export default class MessagesManager {
 
         client.on(Events.MessageCreate, async (interaction) => {
 
+            const server = this.servers.find(s=> s.id === interaction.guildId);
+            if (server == null) return // si le serveur n'est pas enregistrer, pas de fonctions suivantes
+
             this.addr_checker.check(interaction, activityPresence);
             this.quoifeurDetector.check(interaction, activityPresence);
             this.swearsChecker.check(interaction, activityPresence);

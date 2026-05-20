@@ -51,15 +51,15 @@ export default class CommitsLogger {
                     }
                 });
 
-                commitsData.clear(); // on efface pour n'avoir qu'un seul element
 
-                commitsData.push({
+                let newcommmit = [] // on efface pour n'avoir qu'un seul element : TODO à revoir
+                newcommmit.push({
                     title: title,
                     description: description,
                     author: author
                 });
 
-                fs.writeFileSync(LOGCOMMITSFILE, JSON.stringify(commitsData));
+                fs.writeFileSync(LOGCOMMITSFILE, JSON.stringify(newcommmit));
                 
 
             }
