@@ -2,6 +2,7 @@ import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { GITHUB_REPOSITORY, PERMISSIONS } from '../../tools/constants.js';
 import { logout, main } from '../../main.js';
 import { exec } from 'node:child_process';
+import { exit, exitCode } from 'node:process';
 
 export default {
     permissions: PERMISSIONS.DEVELOPERS,
@@ -18,7 +19,7 @@ export default {
             {
                 // on redémarre
                 logout(interaction.client);
-                main();
+                exit(1);
             }
             else if (error.code === 128)
             {
