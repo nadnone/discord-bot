@@ -1,4 +1,3 @@
-import { Resolver } from "node:dns";
 import { ActivityType } from "discord.js";
 import blacklist_links from '../config/blacklist.json' with {type: "json"}
 import whitelist_list from '../config/whitelist.json' with {type: "json"}

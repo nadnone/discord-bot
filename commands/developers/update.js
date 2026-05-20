@@ -19,7 +19,7 @@ export default {
             {
                 // on redémarre
                 logout(interaction.client);
-                exit(1);
+                exit(1); // on simule une erreur pour que docker redémarre le container
             }
             else if (error.code === 128)
             {

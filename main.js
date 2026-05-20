@@ -8,7 +8,7 @@ import BotReady from './events/BotReady.js';
 import path from 'node:path';
 import Address_checker from './modules/Address_checker.js';
 import fs, { mkdirSync } from 'node:fs';
-import { BLACKLISTFILE, LOGCOMMITSFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
+import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API, BLACKLISTFILE, LOGCOMMITSFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
 
 export async function main() {
@@ -68,6 +68,7 @@ async function load_files() {
         data.push({name: WARNJSONFILE, status: await fs.existsSync(BLACKLISTFILE)});
         data.push({name: WARNJSONFILE, status: await fs.existsSync(WHITELISTFILE)});
         data.push({name: LOGCOMMITSFILE, status: await fs.existsSync(LOGCOMMITSFILE)});
+        data.push({name: ALLOWERBARDWORDSFILE, status: await fs.existsSync(ALLOWERBARDWORDSFILE)});
 
         for (const file of data) {
             if (!file.status) {
