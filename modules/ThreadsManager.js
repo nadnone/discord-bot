@@ -11,9 +11,11 @@ export default class ThreadsManager {
 
     async check(interaction, activityPresence) {
 
-        const server = await this.db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId.toString());
+        let raw_threads = await this.db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId.toString());
         const lang = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString());
-        let threads = JSON.parse(server.threads);
+        if (raw_threads == null) return
+
+        const threads = raw_threads.threads
 
         if (!threads.includes(await interaction.channel.id)) return
 
@@ -27,7 +29,7 @@ export default class ThreadsManager {
         // si ce n'est pas une fichier ou un lien
         if (lastmessage.attachments.size <= 0 && !lastmessage.content.toString().match("https|http|ftp|ftps")) return
 
-        if (lang.language === "FR"){
+        if (lang.language === "FR") {
 
             await interaction.channel.threads.create({
                 name: "Discussion sur l'objet",

@@ -39,6 +39,7 @@ export async function main() {
     new BotReady(client)
     
     const db = new Database(dirname);
+    db._backup();
     db._deploy(); // pour les mises à niveau de la base de donnée
 
 

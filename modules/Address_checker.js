@@ -1,7 +1,7 @@
 import { ActivityType } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { BLACKLISTFILE, BLACKLISTSFWFILE, WHITELISTFILE } from "../tools/constants.js";
+import { BLACKLISTFILE, BLACKLISTSFWFILE, DATABASE_KEYS, WHITELISTFILE } from "../tools/constants.js";
 
 export default class Address_checker {
 
@@ -42,6 +42,9 @@ export default class Address_checker {
     async check(interaction, presence)
     {
 
+        const enabled = await this.db.get_servers_info(DATABASE_KEYS.linkAssassin, await interaction.guildId.toString());
+        if (enabled.linkAssassin !== 1) return
+
         this.blacklist = []; // on clear 
 
         let nude_link = interaction.content.toLowerCase();
@@ -55,20 +58,24 @@ export default class Address_checker {
             .trim()
 
 
-        const server = await this.servers.find(s => s.id === interaction.guildId);
+        const serverID = await this.db.get_servers_info(DATABASE_KEYS.serverID, await interaction.guildId.toString());
+        const lang = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString());
+        const nsfw = await this.db.get_servers_info(DATABASE_KEYS.nsfw, await interaction.guildId.toString());
 
-        if (server.langage === "FR")
+
+        if (lang.langage === "FR")
             presence.set("Verifie un lien è_é", ActivityType.Watching);
         else 
             presence.set("Checking a link è_é", ActivityType.Watching);
 
 
 
-        let allowed = this.whitelist.filter((el) => nude_link.includes(el)).length > 0
-        if (allowed) return
+        let allowed = await this.db.get_servers_info(DATABASE_KEYS.whitelist, await interaction.guildId.toString());
+        
+        if (allowed.whitelist == null) return
+        if (allowed.whitelist.includes(nude_link)) return
 
-
-        if (!server.NSFW)
+        if (nsfw.nsfw === 0) // si c'est un Safe for work server
         {
             this.blacklist = this.blacklist_nsfw.concat(this.blacklist_sfw);
         }
@@ -85,13 +92,13 @@ export default class Address_checker {
                             .trim()
             
                             
-                if (rslt.includes(nude_link) && server.language === "FR") {
+                if (rslt.includes(nude_link) && lang.language === "FR") {
                     await interaction.reply("Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.");
                     await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction, this.db);
                     await interaction.delete();
                     return true
                 }
-                else if (rslt.includes(nude_link) && server.language === "EN") {
+                else if (rslt.includes(nude_link) && lang.language === "EN") {
                     await interaction.reply("Not allowed link detected, if you think I'm wrong, please send a ticket.");
                     await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interactio, this.db);
                     await interaction.delete();

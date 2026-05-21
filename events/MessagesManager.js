@@ -1,9 +1,9 @@
 import { Events } from "discord.js";
 import Address_checker from '../modules/Address_checker.js';
 import QuoiFeurDetector from "../modules/QuoiFeurDetector.js";
-import SwearsChecker from "../modules/SwearsChecker.js";
+import SwearsChecker from "../modules/LinkAssassin.js";
 import fs from 'node:fs';
-import { SERVERSLISTFILE } from "../tools/constants.js";
+import { DATABASE_KEYS, SERVERSLISTFILE } from "../tools/constants.js";
 import ThreadsManager from "../modules/ThreadsManager.js";
 import Database from "../tools/Database.js";
 
@@ -12,20 +12,19 @@ export default class MessagesManager {
     constructor(db) {
         this.db = db;
 
-        this.servers = JSON.parse(fs.readFileSync(SERVERSLISTFILE));
-
-        this.addr_checker = new Address_checker(this.servers, this.db);
-        this.quoifeurDetector = new QuoiFeurDetector(this.servers);
-        this.swearsChecker = new SwearsChecker(this.servers, this.db);
-        this.threadsManager = new ThreadsManager(this.servers, this.db);
+        this.addr_checker = new Address_checker(null, this.db);
+        this.quoifeurDetector = new QuoiFeurDetector(this.db);
+        this.swearsChecker = new SwearsChecker(null, this.db);
+        this.threadsManager = new ThreadsManager(null, this.db);
     }
 
-    eventLoop(client, activityPresence, db) {
+    eventLoop(client, activityPresence) {
 
         client.on(Events.MessageCreate, async (interaction) => {
 
-            const server = this.servers.find(s=> s.id === interaction.guildId);
-            if (server == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
+            const server = await this.db.get_servers_info(DATABASE_KEYS.serverID, await interaction.guildId.toString());
+            if (server.serverID == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
+
 
             let bad = this.addr_checker.check(interaction, activityPresence);
             bad &= this.swearsChecker.check(interaction, activityPresence);

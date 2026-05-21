@@ -1,15 +1,16 @@
 import { ActivityType } from "discord.js";
+import { DATABASE_KEYS } from "../tools/constants.js";
 
 export default class QuoiFeurDetector {
 
-    constructor(servers) {
-        this.servers = servers
+    constructor(db) {
+        this.db = db
         this.cooldown = 15; // toutes les 15 fois
     }
 
     check(interaction, presence) {
 
-        const server = this.servers.find(s => s.id === interaction.guildId);
+        const server = this.db.get_servers_info(DATABASE_KEYS.language, interaction.guildId.toString());
         
         if (server.languange !== "FR") return // si ce n'est pas un serveur francophone, on passe
 

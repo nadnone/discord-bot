@@ -5,8 +5,6 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { exec } from "node:child_process";
 
-// Pour pouvoir migrer plus tard
-
 export default class Database {
 
     constructor(dirname) {
@@ -38,7 +36,8 @@ export default class Database {
                 nsfw BOOLEAN NOT NULL,
                 language TEXT NOT NULL, 
                 threads TEXT,
-                whitelist TEXT
+                whitelist TEXT,
+                linkAssassin BOOLEAN NOT NULL
                 );
                 `);
 
@@ -53,26 +52,28 @@ export default class Database {
     
             console.log("Création de la base de donnée");
             
-            const servers = await this.read(SERVERSLISTFILE)
+            let servers = await this.read("./data/servers.json")
             if (servers == null) return
-            
-            const whitelist_default = await this.read(WHITELISTFILE);
-            if (whitelist_default == null) throw "Whitelist not found"
-    
+
             for (const server of servers) {
-    
+
+                const default_whitelist = ["youtube.com","google.com","google.fr","tiktok.com","facebook.com","google.ch","reddit.com"]
+
                 let values = []
     
                 let threads = server.threads;
                 if (threads == null) threads = [];
                 threads = JSON.stringify(threads);
+
+                if (server.whitelist == null) server.whitelist = default_whitelist;
     
                 values.push(server.owner);
                 values.push(server.id);
                 values.push(server.NSFW ? 1 : 0);
                 values.push(server.language);
-                values.push(threads);
-                values.push(JSON.stringify(whitelist_default));
+                values.push(JSON.stringify(threads));
+                values.push(JSON.stringify(server.whitelist)); 
+                values.push(0); // linkAssassin
                 this.insert_new_server(values);
     
             }
@@ -90,11 +91,11 @@ export default class Database {
     async insert_new_server(values) {
 
         try {
-            if (values.length < 5) throw "not enough values";
+            if (values.length < 6) throw "not enough values";
     
             let insert = this.db.prepare(`
-                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist, linkAssassin)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
             `);
         
             await insert.run(...values)
@@ -131,12 +132,12 @@ export default class Database {
         
         try {
             
-                    const check = DATABASE_CHECK.includes(key)
-                    if (!check) throw "Not a valid key";
-            
-                    let getter = this.db.prepare(`SELECT ${key} FROM servers WHERE serverID = ?;`);
-            
-                    return await getter.get(serverID);
+            const check = DATABASE_CHECK.includes(key)
+            if (!check) throw "Not a valid key";
+    
+            let getter = this.db.prepare(`SELECT ${key} FROM servers WHERE serverID = ? ;`);
+    
+            return await getter.get(serverID);
             
         } catch (e) {
             console.log(`${e} -> tools/Database.js`);
@@ -213,42 +214,34 @@ export default class Database {
     async _get_servers_list() {
 
         let query = this.db.prepare(`
-            SELECT * FROM servers;
-        `).all();
+            SELECT * FROM servers ;
+        `);
 
-        return query;
+        return await query.all();
     }
 
     async _backup() {
+            console.log("Création du fichier de sauvegarde");
+
             const servers = await this._get_servers_list();
-            await this.erase(JSON.stringify(servers), "./backup");
+
+            await this.erase(JSON.stringify(servers), "./data/backup.json");
     }
 
-    async _deploy() {
+    _deploy() {
 
         try {
 
-            if (!fs.existsSync("./tmp")) return
+            // protection anti perte de données
+            if (!fs.existsSync("./data/backup.json")) return
 
             console.log("Mise à jours de la base de donnée");
             
-
-            const whitelist_default = await this.read(WHITELISTFILE);
-                if (whitelist_default == null) return
-
-
-            const servers = await this.read("./tmp");
-
-            for (const server of servers) {
-                
-                let query = await this.db.prepare(`
-                    UPDATE servers
-                    SET whitelist = ?
-                    WHERE serverID = ?;
-                `)
-                query.run(JSON.stringify(whitelist_default), server.serverID);
-    
-            }
+            fs.unlinkSync(this.p)
+            
+            this.db = new DatabaseSync(this.p);
+            
+            this._init();
             
             
         } catch (e) {

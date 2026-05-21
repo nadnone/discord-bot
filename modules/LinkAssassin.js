@@ -26,8 +26,11 @@ export default class SwearsChecker {
 
     async check(interaction, presence)
     {
-        const server = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString())
-
+        const serverID = await interaction.guildId.toString();
+        const server = await this.db.get_servers_info(DATABASE_KEYS.language, await serverID)
+        let enabled = await this.db.get_servers_info(DATABASE_KEYS.linkAssassin, await serverID)
+        if (enabled == null) enabled = false;
+        
         let words = interaction.content.toLowerCase();
 
         words = words.trim().split(" ");
@@ -43,6 +46,7 @@ export default class SwearsChecker {
 
         for (const word of words)
         {
+
             const rslt = await this.blacklist.filter(bw => bw === word.toLowerCase());
             if (rslt.length < 1) continue
 

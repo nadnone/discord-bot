@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord-api-types/v9';
-import { SlashCommandBuilder } from 'discord.js';
+import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { PERMISSIONS } from '../../tools/constants.js';
 
 export default {
@@ -16,7 +16,7 @@ export default {
 
 		try {
 
-			await interaction.deferReply();
+			await interaction.reply({content: "Please wait..", flag: MessageFlags.Ephemeral})
 
 			let channels = await interaction.guild.channels.fetch();
 			let textchannel = await interaction.channel
@@ -32,20 +32,15 @@ export default {
 				
 				if (msgs.size <= 0 || msgs == null) clearInterval(interval);
 
-				await msgs.forEach(msg => msg != null ? msg.delete() : _);
+				await msgs.forEach(msg => msg != null ? msg.delete().catch(e => {}) : _);
 
-			}, 2_500);
+			}, 3_500);
 
 			
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> purge.js`);
 			clearInterval(interval);
 		}
-		finally {
-			setTimeout(async () => await interaction.followUp("Tâches terminée"), 500);
-			
-		}
-
 		
 	},
 };
