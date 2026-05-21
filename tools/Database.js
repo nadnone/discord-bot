@@ -1,25 +1,26 @@
-import { log } from "node:console";
-import { DATABASE_CHECK, DATABASE_KEYS, SERVERSLISTFILE, WARNJSONFILE } from "./constants.js";
+import { dir, log } from "node:console";
+import { DATABASE_CHECK, DATABASE_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
 import fs from 'node:fs';
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { exec } from "node:child_process";
 
 // Pour pouvoir migrer plus tard
 
 export default class Database {
 
     constructor(dirname) {
-        const p = path.join(dirname, "/data/data.db")
+        this.p = path.join(dirname, "/data/data.db")
 
 
-        if (!fs.existsSync(p))
+        if (!fs.existsSync(this.p))
         {
-            this.db = new DatabaseSync(p);
+            this.db = new DatabaseSync(this.p);
             this._init();
             return
         }
 
-        this.db = new DatabaseSync(p);
+        this.db = new DatabaseSync(this.p);
 
     }
 
@@ -36,7 +37,8 @@ export default class Database {
                 serverID TEXT NOT NULL, 
                 nsfw BOOLEAN NOT NULL,
                 language TEXT NOT NULL, 
-                threads TEXT
+                threads TEXT,
+                whitelist TEXT
                 );
                 `);
 
@@ -49,11 +51,13 @@ export default class Database {
             );
             `);
     
-            console.log("Mise à jours de la base de donnée");
+            console.log("Création de la base de donnée");
             
             const servers = await this.read(SERVERSLISTFILE)
             if (servers == null) return
             
+            const whitelist_default = await this.read(WHITELISTFILE);
+            if (whitelist_default == null) throw "Whitelist not found"
     
             for (const server of servers) {
     
@@ -63,16 +67,19 @@ export default class Database {
                 if (threads == null) threads = [];
                 threads = JSON.stringify(threads);
     
-                values.push(server.owner)
-                values.push(server.id)
-                values.push(server.NSFW ? 1 : 0)
-                values.push(server.language)
-                values.push(threads)
-    
+                values.push(server.owner);
+                values.push(server.id);
+                values.push(server.NSFW ? 1 : 0);
+                values.push(server.language);
+                values.push(threads);
+                values.push(JSON.stringify(whitelist_default));
                 this.insert_new_server(values);
     
             }
     
+
+            return true;
+
         } catch (e) {
             console.log(`${e} -> tools/Database.js:_init()`);
             
@@ -86,8 +93,8 @@ export default class Database {
             if (values.length < 5) throw "not enough values";
     
             let insert = this.db.prepare(`
-                INSERT INTO servers (owner, serverID, nsfw, language, threads)
-                VALUES (?, ?, ?, ?, ?);
+                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist)
+                VALUES (?, ?, ?, ?, ?, ?);
             `);
         
             await insert.run(...values)
@@ -202,5 +209,52 @@ export default class Database {
         
         return JSON.parse(await fs.readFileSync(context));
     }
-     
+    
+    async _get_servers_list() {
+
+        let query = this.db.prepare(`
+            SELECT * FROM servers;
+        `).all();
+
+        return query;
+    }
+
+    async _backup() {
+            const servers = await this._get_servers_list();
+            await this.erase(JSON.stringify(servers), "./backup");
+    }
+
+    async _deploy() {
+
+        try {
+
+            if (!fs.existsSync("./tmp")) return
+
+            console.log("Mise à jours de la base de donnée");
+            
+
+            const whitelist_default = await this.read(WHITELISTFILE);
+                if (whitelist_default == null) return
+
+
+            const servers = await this.read("./tmp");
+
+            for (const server of servers) {
+                
+                let query = await this.db.prepare(`
+                    UPDATE servers
+                    SET whitelist = ?
+                    WHERE serverID = ?;
+                `)
+                query.run(JSON.stringify(whitelist_default), server.serverID);
+    
+            }
+            
+            
+        } catch (e) {
+            console.log(`${e} -> tools/Database.js:_deploy()`);
+            
+        }
+
+    }
 }

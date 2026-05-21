@@ -11,6 +11,6 @@ export default {
       
         await interaction.reply(":saluting_face:")
         logout(interaction.client);
-        exit();
+        exit(0);
     },
 };

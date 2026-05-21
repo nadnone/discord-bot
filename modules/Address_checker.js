@@ -60,7 +60,7 @@ export default class Address_checker {
         if (server.langage === "FR")
             presence.set("Verifie un lien è_é", ActivityType.Watching);
         else 
-            presence.set("Looking a link è_é", ActivityType.Watching);
+            presence.set("Checking a link è_é", ActivityType.Watching);
 
 
 

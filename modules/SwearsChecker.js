@@ -1,7 +1,7 @@
 import { ActivityType } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR } from "../tools/constants.js";
+import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR, DATABASE_CHECK, DATABASE_KEYS } from "../tools/constants.js";
 
 export default class SwearsChecker {
 
@@ -26,7 +26,7 @@ export default class SwearsChecker {
 
     async check(interaction, presence)
     {
-        const server = this.servers.find(s => s.id === interaction.guildId);
+        const server = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString())
 
         let words = interaction.content.toLowerCase();
 
@@ -51,14 +51,14 @@ export default class SwearsChecker {
 
             if (rslt.length > 0 && server.language === "FR")
             {
-                warnUser(interaction.member, `Insulte non familière detectée ${word}`, interaction, this.db)
+                warnUser(interaction.member, `Insulte non familière detectée: ${word}`, interaction, this.db)
                 await interaction.reply("Une insulte = un warn (:");
                 await interaction.delete();
                 return true;
             }
             else if (rslt.length > 0 && server.language === "EN")
             {
-                warnUser(interaction.member, `A swear detected ${word}`, interaction, this.db)
+                warnUser(interaction.member, `A swear detected: ${word}`, interaction, this.db)
                 await interaction.reply("A swear = a warn (:");
                 await interaction.delete();
                 return true;

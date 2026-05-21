@@ -27,7 +27,7 @@ export default class ThreadsManager {
         // si ce n'est pas une fichier ou un lien
         if (lastmessage.attachments.size <= 0 && !lastmessage.content.toString().match("https|http|ftp|ftps")) return
 
-        if (lang === "FR"){
+        if (lang.language === "FR"){
 
             await interaction.channel.threads.create({
                 name: "Discussion sur l'objet",

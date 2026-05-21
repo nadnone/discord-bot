@@ -8,12 +8,13 @@ export const DATABASE_KEYS = {
     language: "language",
     threads: "threads",
     nsfw: "nsfw",
-    serverID: "serverID"
+    serverID: "serverID",
+    whitelist: "whitelist"
 };
 
 export const DATABASE_CHECK = [
-    "owner", "language", "threads", "nsfw", "serverID"
-]
+    "owner", "language", "threads", "nsfw", "serverID", "whitelist"
+];
 
 export const WARNJSONFILE = "./data/warns.json";
 export const DEVELOPERSJSONFILE = "./config/developers.json";

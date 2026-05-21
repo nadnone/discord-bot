@@ -55,7 +55,7 @@ export default {
 			}, 2_500);
 
 		} catch (e) {
-			console.log(`Erreur : ${e.message} -> purge.js`);
+			console.log(`Erreur : ${e.message} -> nettoyer.js`);
 		}
 		finally {
 			setTimeout(async () => await interaction.followUp("Tâches terminée"), 500);

@@ -15,29 +15,27 @@ export default class SlashCmdManager {
 
     async _isDeveloper(interaction) {
         
-        const isdev = await developers_list.filter(el => el === interaction.user.id.toString());
+        const isdev = await developers_list.includes(interaction.user.id.toString());
 
-        if (await isdev.length < 1) // si le tableau est vide, l'id n'existe pas 
-        {
+        if (!isdev) // si le tableau est vide, l'id n'existe pas 
             return false;
-        }
-
-        return true;
+        else
+            return true;
     }
 
     async _isModerator(interaction) {
 
         if (interaction.memberPermissions.has("BanMembers"))
             return true; // si l'auteur est membre des gens qui peuvent bannirs
-
-        return false;
+        else 
+            return false;
     }
 
     async _isUser(interaction) {
         if (interaction.memberPermissions.has("SendMessages"))
             return true;
-
-        else return false;
+        else 
+            return false;
     }
 
     eventLoop(client, activityPresence) {
