@@ -20,9 +20,8 @@ export default {
 
             const cible = interaction.options.getUser('cible')
     
-            const list = await db.read(WARNJSONFILE);
-
-            const warns = await list.filter((el) => el.cible === cible.id);
+            let warns = await db.get_warns(cible.id.toString(), await interaction.guildId.toString());
+            if (warns == null) warns = [];
 
             let response = new EmbedBuilder()
                             .setColor(0x4D4D47)
@@ -36,7 +35,7 @@ export default {
                 
                 const warn = warns[i];
 
-                response.addFields({ name: `motif n°${i+1}`, value: warn.raison, inline: false })
+                response.addFields({ name: `motif n°${i+1}`, value: warn.reason, inline: false })
             }
 
             await interaction.reply({ embeds: [response] });

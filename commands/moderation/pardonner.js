@@ -26,7 +26,7 @@ export default {
             const cible = interaction.options.getUser('cible')
             const motif = interaction.options.getString('raison');
     
-            pardon(cible, motif, db);
+            pardon(cible, await interaction.guildId.toString(), db);
     
             await interaction.reply(`${cible} Tu es pardonné (motif: ${motif})`);
 

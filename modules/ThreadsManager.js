@@ -1,5 +1,5 @@
 import { ThreadAutoArchiveDuration } from 'discord.js';
-import { SERVERSLISTFILE } from '../tools/constants.js'
+import { DATABASE_KEYS, SERVERSLISTFILE } from '../tools/constants.js'
 
 export default class ThreadsManager {
 
@@ -11,22 +11,23 @@ export default class ThreadsManager {
 
     async check(interaction, activityPresence) {
 
-        this.servers = await this.db.read(SERVERSLISTFILE)
+        const server = await this.db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId.toString());
+        const lang = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString());
+        let threads = JSON.parse(server.threads);
 
-        const server = this.servers.find(s=> s.id === interaction.guildId); // TODO, faire un fichier à part
-        if (server == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
-        if (!server.hasThreads) return // s'il n'y a aucun threads activé
-
-        const chanId = server.threads.find(c => c === interaction.channel.id);
-        if (chanId == null) return // si le salon n'est pas dans la liste
+        if (!threads.includes(await interaction.channel.id)) return
 
         // on récupère le dernier message pour controle
         const lastmessage = await interaction.channel.lastMessage;
+        
 
         // si déjà un thread ou si c'est un bot
         if (await lastmessage.hasThreads || await lastmessage.author.bot) return 
+        
+        // si ce n'est pas une fichier ou un lien
+        if (lastmessage.attachments.size <= 0 && !lastmessage.content.toString().match("https|http|ftp|ftps")) return
 
-        if (server.language === "FR"){
+        if (lang === "FR"){
 
             await interaction.channel.threads.create({
                 name: "Discussion sur l'objet",

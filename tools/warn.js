@@ -7,26 +7,18 @@ export default async function warnUser(cible, motif, interaction, db) {
 
     try
     {
-        let list = await db.read(WARNJSONFILE);
-        
-        const registre = list.filter(el => el.cible === cible.id.toString());
+        let warns_count = await db.count_warns(cible.id.toString(), await interaction.guildId.toString());
+        if (warns_count == null) warns_count = [];
 
-        if (registre.length >= WARNS_BEFORE_BAN)
+        
+        if (warns_count >= WARNS_BEFORE_BAN)
         {
             await banUser(cible, "4x warn, donc ban", interaction);
-
-            list = await list.filter(el => el.cible !== cible.id.toString());
-            await db.erase(JSON.stringify(list), WARNJSONFILE)
+            await this.db.clear_warns(cible.id.toString(), await interaction.guildId.toString());
             return
         }
 
-        list.push(({
-			"cible": cible.id.toString(),
-			"raison": motif.toString()
-		}));
-
-
-        await db.erase(JSON.stringify(list), WARNJSONFILE);
+        await db.set_warn(cible.id.toString(), motif.toString(), await interaction.guildId.toString())
        
     }
     catch (e)

@@ -20,7 +20,7 @@ export default {
 
 		try {
 
-			await interaction.deferReply();
+			await interaction.reply("J'y travaille...");
 
 			let max = parseInt(interaction.options.getString("nombre"));
 
@@ -47,7 +47,7 @@ export default {
 					
 					if (msg != null)
 					{
-						msg.delete()
+						msg.delete().catch(e => {--max})
 						--max;
 					}
 				});

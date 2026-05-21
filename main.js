@@ -38,7 +38,7 @@ export async function main() {
     const dirname = import.meta.dirname;
     new BotReady(client)
     
-    const db = new Database();
+    const db = new Database(dirname);
 
     const presence = new ActivityPresence(client);
     const cmdsloader = new CommandsLoader(dirname);

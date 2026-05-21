@@ -33,12 +33,10 @@ export default class SwearsChecker {
         words = words.trim().split(" ");
 
         if (server.language === "FR"){
-            presence.set("Verifie un mot è_é", ActivityType.Watching);
             this.blacklist = this.blacklist_FR
         }
         else 
         {
-            presence.set("Check a word è_é", ActivityType.Watching);
             this.blacklist = this.blacklist_EN;
         } 
 

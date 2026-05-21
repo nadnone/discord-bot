@@ -3,6 +3,17 @@ export const PERMISSIONS = {
     MODERATORS: "moderators",
     DEVELOPERS: "developers"
 }
+export const DATABASE_KEYS = {
+    owner: "owner",
+    language: "language",
+    threads: "threads",
+    nsfw: "nsfw",
+    serverID: "serverID"
+};
+
+export const DATABASE_CHECK = [
+    "owner", "language", "threads", "nsfw", "serverID"
+]
 
 export const WARNJSONFILE = "./data/warns.json";
 export const DEVELOPERSJSONFILE = "./config/developers.json";
