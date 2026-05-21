@@ -1,10 +1,12 @@
 import { ActivityType, Events } from "discord.js";
 import { PERMISSIONS } from "../tools/constants.js";
 import developers_list from "../config/developers.json" with {type: "json"};
+import Database from "../tools/Database.js";
 
 export default class SlashCmdManager {
-    constructor() {
+    constructor(db) {
         this.commands = []
+        this.db = db;
     }
 
     setCommands(commands) {
@@ -52,21 +54,21 @@ export default class SlashCmdManager {
                     cmd.permissions === PERMISSIONS.MODERATORS && await this._isModerator(interaction))
                 {
                     activityPresence.set('Entrain de servir...', ActivityType.Playing);
-                    await cmd.execute(interaction);
+                    await cmd.execute(interaction, this.db);
                     return
                 }
                 else if (interaction.commandName === cmd.data.toJSON().name &&
                     cmd.permissions === PERMISSIONS.USERS && await this._isUser(interaction))
                 {
                     activityPresence.set('Entrain de travailler...', ActivityType.Playing);
-                    await cmd.execute(interaction);
+                    await cmd.execute(interaction, this.db);
                     return
                 }
                 else if (interaction.commandName === cmd.data.toJSON().name &&
                     cmd.permissions === PERMISSIONS.DEVELOPERS && await this._isDeveloper(interaction))
                 {
                     activityPresence.set('En maintenance...', ActivityType.Playing);
-                    await cmd.execute(interaction);
+                    await cmd.execute(interaction, this.db);
                     return
 
                 }

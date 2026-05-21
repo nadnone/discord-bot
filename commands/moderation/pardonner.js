@@ -20,13 +20,13 @@ export default {
 					.setRequired(true)
 			),
 
-	async execute(interaction) {
+	async execute(interaction, db) {
 
         try {
             const cible = interaction.options.getUser('cible')
             const motif = interaction.options.getString('raison');
     
-            pardon(cible, motif);
+            pardon(cible, motif, db);
     
             await interaction.reply(`${cible} Tu es pardonné (motif: ${motif})`);
 

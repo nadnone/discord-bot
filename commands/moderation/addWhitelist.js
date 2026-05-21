@@ -14,13 +14,12 @@ export default {
 					.setDescription("Le lien à mettre dans la whitelist")
 					.setRequired(true)
 			),
-	async execute(interaction) {
+	async execute(interaction, db) {
 
         try {
 
             const lien = interaction.options.getString('lien')
-            let list =  JSON.parse(await fs.readFileSync(WHITELISTFILE));
-
+            let list = await db.read(WHITELISTFILE);
 
             const doublon = list.filter(el => el.includes(lien));
 
@@ -32,7 +31,7 @@ export default {
 
             list.push(lien);
 
-            await fs.writeFileSync(WHITELISTFILE, JSON.stringify(list));
+            await db.erase(JSON.stringify(list), WHITELISTFILE);
 
             interaction.reply("Lien ajouté");
         }

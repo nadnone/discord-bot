@@ -10,6 +10,7 @@ import Address_checker from './modules/Address_checker.js';
 import fs, { mkdirSync } from 'node:fs';
 import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
+import Database from './tools/Database.js';
 
 export async function main() {
 
@@ -37,14 +38,16 @@ export async function main() {
     const dirname = import.meta.dirname;
     new BotReady(client)
     
+    const db = new Database();
+
     const presence = new ActivityPresence(client);
     const cmdsloader = new CommandsLoader(dirname);
     
-    const slashcmdMAnager = new SlashCmdManager();
+    const slashcmdMAnager = new SlashCmdManager(db);
     slashcmdMAnager.setCommands(cmdsloader.get_commands());
     slashcmdMAnager.eventLoop(client, presence);
     
-    const msgManager = new MessagesManager();
+    const msgManager = new MessagesManager(db);
     msgManager.eventLoop(client, presence);
     
     client.login(config.token);

@@ -5,10 +5,11 @@ import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR } from
 
 export default class SwearsChecker {
 
-    constructor(servers) {
+    constructor(servers, db) {
         this.servers = servers;
         this.allowedbWords = null;
         this.blacklist = null;
+        this.db = db
         this._init();
     }
 
@@ -52,23 +53,24 @@ export default class SwearsChecker {
 
             if (rslt.length > 0 && server.language === "FR")
             {
-                warnUser(interaction.member, `Innsulte non familière detectée ${word}`, interaction)
+                warnUser(interaction.member, `Insulte non familière detectée ${word}`, interaction, this.db)
                 await interaction.reply("Une insulte = un warn (:");
                 await interaction.delete();
-                return;
+                return true;
             }
             else if (rslt.length > 0 && server.language === "EN")
             {
-                warnUser(interaction.member, `A swear detected ${word}`, interaction)
+                warnUser(interaction.member, `A swear detected ${word}`, interaction, this.db)
                 await interaction.reply("A swear = a warn (:");
                 await interaction.delete();
-                return;
+                return true;
             }
         }
 
 
-            
 
+
+        return false;
     }
 
 }

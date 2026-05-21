@@ -14,13 +14,14 @@ export default {
 					.setDescription("Le membre que vous voulez observer")
 					.setRequired(true)
 			),
-	async execute(interaction) {
+	async execute(interaction, db) {
 
         try {
 
             const cible = interaction.options.getUser('cible')
     
-            const list =  JSON.parse(await fs.readFileSync(WARNJSONFILE));
+            const list = await db.read(WARNJSONFILE);
+
             const warns = await list.filter((el) => el.cible === cible.id);
 
             let response = new EmbedBuilder()

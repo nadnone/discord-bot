@@ -3,15 +3,15 @@ import banUser from './ban.js';
 import fs from 'node:fs';
 import { WARNJSONFILE, WARNS_BEFORE_BAN } from './constants.js';
  
-export default async function pardon(cible, motif) {
+export default async function pardon(cible, motif, db) {
 
     try
     {
-        let list =  JSON.parse(await fs.readFileSync(WARNJSONFILE));
+        let list = await db.read(WARNJSONFILE);
 
         list = await list.filter(el => el.cible !== cible.id.toString());
 
-        await fs.writeFileSync(WARNJSONFILE, JSON.stringify(list));
+        await db.erase(JSON.stringify(list), WARNJSONFILE);
 
     }
     catch (e)

@@ -5,11 +5,13 @@ import { BLACKLISTFILE, BLACKLISTSFWFILE, WHITELISTFILE } from "../tools/constan
 
 export default class Address_checker {
 
-    constructor(servers) {
+    constructor(servers, db) {
         this.servers = servers;
         this.blacklist = [];
         this.blacklist_sfw = [];
+        this.blacklist_nsfw = [];
         this.whitelist = null;
+        this.db = db
         this._init();
     }
     
@@ -28,17 +30,19 @@ export default class Address_checker {
     async _init()
     {
 
-        const blacklist_array = JSON.parse(fs.readFileSync(BLACKLISTFILE));
-        const blacklist_SFW_array = JSON.parse(fs.readFileSync(BLACKLISTSFWFILE));
-        this.whitelist = JSON.parse(fs.readFileSync(WHITELISTFILE));
+        const blacklist_NSFW_array = await this.db.read(BLACKLISTFILE)
+        const blacklist_SFW_array = await this.db.read(BLACKLISTSFWFILE)
+        this.whitelist = await this.db.read(WHITELISTFILE)
 
-        this._load_list(blacklist_array, this.blacklist);
+        this._load_list(blacklist_NSFW_array, this.blacklist_nsfw);
         this._load_list(blacklist_SFW_array, this.blacklist_sfw);
 
     }
 
     async check(interaction, presence)
     {
+
+        this.blacklist = []; // on clear 
 
         let nude_link = interaction.content.toLowerCase();
 
@@ -66,8 +70,7 @@ export default class Address_checker {
 
         if (!server.NSFW)
         {
-            this.blacklist = this.blacklist.concat(this.blacklist_sfw);
-            return
+            this.blacklist = this.blacklist_nsfw.concat(this.blacklist_sfw);
         }
 
         for (const el of this.blacklist)
@@ -84,21 +87,21 @@ export default class Address_checker {
                             
                 if (rslt.includes(nude_link) && server.language === "FR") {
                     await interaction.reply("Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.");
-                    await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction);
+                    await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction, this.db);
                     await interaction.delete();
-                    return
+                    return true
                 }
                 else if (rslt.includes(nude_link) && server.language === "EN") {
                     await interaction.reply("Not allowed link detected, if you think I'm wrong, please send a ticket.");
-                    await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interaction);
+                    await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interactio, this.db);
                     await interaction.delete();
-                    return
+                    return true
                 }
         }
 
 
             
-
+        return false;
     }
 
 }

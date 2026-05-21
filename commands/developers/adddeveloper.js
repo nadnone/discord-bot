@@ -15,11 +15,11 @@ export default {
                 .setDescription("Le membre à mettre dev")
                 .setRequired(true)
 		),
-	async execute(interaction) {
+	async execute(interaction, db) {
       
     
 		const cible = interaction.options.getUser('operateur')
-        const developer_list = await fs.readFileSync(DEVELOPERSJSONFILE);
+        const developer_list = await db.read(DEVELOPERSJSONFILE);
 
 
         if (developer_list.includes(cible.id))
@@ -31,7 +31,7 @@ export default {
         developer_list.push(cible.id.toString());
 
         try {
-            await fs.writeFileSync(DEVELOPERSJSONFILE, JSON.stringify(developer_list));
+            await db.erase(JSON.stringify(developer_list), DEVELOPERSJSONFILE);
         }
         catch (e) 
         {

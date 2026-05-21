@@ -19,13 +19,13 @@ export default {
 					.setRequired(true)
 			),
 
-	async execute(interaction) {
+	async execute(interaction, db) {
 
 		
 		const cible = interaction.options.getUser('cible')
 		const motif = interaction.options.getString('raison');
 
-		await warnUser(cible, motif, await interaction);
+		await warnUser(cible, motif, await interaction, db);
  
 		await interaction.reply(`${cible} Attention, je t'ai à l'oeil. (motif: ${motif})`);
 

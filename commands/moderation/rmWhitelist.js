@@ -14,22 +14,22 @@ export default {
 					.setDescription("Le lien à retirer de la whitelist")
 					.setRequired(true)
 			),
-	async execute(interaction) {
+	async execute(interaction, db) {
 
         try {
 
             const lien = interaction.options.getString('lien')
-            let list =  JSON.parse(await fs.readFileSync(WHITELISTFILE));
+            let list = await db.read(WHITELISTFILE)
 
             list =  list.filter(l => !l.includes(lien))
 
-            await fs.writeFileSync(WHITELISTFILE, JSON.stringify(list));
+            await db.erase(JSON.stringify(list), WHITELISTFILE);
 
             interaction.reply("Lien retiré");
         }
         catch (e) 
         {
-            console.log(`Erreur : ${e.message} -> warnlist.js`);
+            console.log(`Erreur : ${e.message} -> rmwhitelist.js`);
             
         }
 

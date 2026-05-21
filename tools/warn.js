@@ -3,20 +3,20 @@ import banUser from './ban.js';
 import fs from 'node:fs';
 import { WARNJSONFILE, WARNS_BEFORE_BAN } from './constants.js';
  
-export default async function warnUser(cible, motif, interaction) {
+export default async function warnUser(cible, motif, interaction, db) {
 
     try
     {
-        let list =  JSON.parse(await fs.readFileSync(WARNJSONFILE));
+        let list = await db.read(WARNJSONFILE);
+        
         const registre = list.filter(el => el.cible === cible.id.toString());
-
 
         if (registre.length >= WARNS_BEFORE_BAN)
         {
             await banUser(cible, "4x warn, donc ban", interaction);
 
             list = await list.filter(el => el.cible !== cible.id.toString());
-            await fs.writeFileSync(WARNJSONFILE, JSON.stringify(list));
+            await db.erase(JSON.stringify(list), WARNJSONFILE)
             return
         }
 
@@ -26,7 +26,7 @@ export default async function warnUser(cible, motif, interaction) {
 		}));
 
 
-        await fs.writeFileSync(WARNJSONFILE, JSON.stringify(list));
+        await db.erase(JSON.stringify(list), WARNJSONFILE);
        
     }
     catch (e)
