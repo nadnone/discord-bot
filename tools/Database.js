@@ -1,5 +1,5 @@
 import { dir, log } from "node:console";
-import { DATABASE_CHECK, DATABASE_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
+import { DATABASE_CHECK, DB_SERVERS_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
 import fs from 'node:fs';
 import path from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
@@ -51,6 +51,14 @@ export default class Database {
             );
             `);
     
+             this.db.exec(`
+                CREATE TABLE linkassassin (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                addresses TEXT NOT NULL, 
+                channels TEXT NOT NULL,
+                serverID TEXT NOT NULL
+            );
+            `);
             console.log("Création de la base de donnée");
             
             let servers = await this.read("./data/backup.json")
@@ -109,7 +117,7 @@ export default class Database {
 
     }
 
-    async update_servers_info(key, value, serverID) {
+    async update_servers(key, value, serverID) {
 
         try {
             const check = DATABASE_CHECK.includes(key);
@@ -131,7 +139,7 @@ export default class Database {
 
     }
 
-    async get_servers_info(key, serverID) {
+    async get_servers(key, serverID) {
         
         try {
             
@@ -214,46 +222,154 @@ export default class Database {
         return JSON.parse(fs.readFileSync(context));
     }
     
-    async _get_servers_list() {
+    async _get_servers_table() {
 
         let query = this.db.prepare(`
             SELECT * FROM servers ;
         `);
 
-        return await query.all();
+        return query.all();
+    }
+
+    async get_chan_linkAssassin(serverID, whitelist) {
+        let query = this.db.prepare("SELECT channels FROM linkassassin WHERE serverID = ? AND addresses = ? ;");
+        return await query.get(serverID, whitelist);
+    }
+
+    async get_linkAssassin(serverID, channel){
+
+        if (channel == null) 
+        {
+            // si null alors on prend tout
+            let query = this.db.prepare("SELECT addresses FROM linkassassin WHERE serverID = ? ;")
+            return await query.all(serverID)
+        }
+        let query = this.db.prepare(`SELECT addresses FROM linkassassin WHERE serverID = ? AND channels = ? ;`)
+        return await query.get(serverID, channel);
+    }
+
+    async insert_linkAssassin(serverID, channel, addresses) {
+        try {
+            
+            let query = this.db.prepare(`
+                INSERT INTO linkassassin (serverID, channels, addresses)
+                VALUES (?, ?, ?) ;
+            `);
+    
+            await query.run(serverID, channel, addresses);
+
+        } catch (e) {
+            console.log(`${e} -> tools/Database.js:insert_linkAssassin()`);
+            
+        }
+
+    }
+
+    remove_linkAssassin(serverID, channel) {
+
+        if (channel == null)
+        {
+            let query = this.db.prepare("DELETE FROM linkassassin WHERE serverID = ?");
+            query.run(serverID);
+            return
+        }
+
+        let query = this.db.prepare(`
+            DELETE FROM linkassassin WHERE serverID = ? AND channels = ? ;
+        `);
+
+        query.run(serverID, channel)
+    }
+
+    _get_linkassassin_table() {
+        let query = this.db.prepare("SELECT * FROM linkassassin ;");
+        return query.all();
+    }
+
+    _get_warns_table() {
+        let query = this.db.prepare("SELECT * FROM warns ;")
+        return query.all();
     }
 
     async _backup() {
-            console.log("Création du fichier de sauvegarde");
 
-            const servers = await this._get_servers_list();
+            try {
 
-            let backup = []
-            for (let srv of servers) {
+                console.log("Création du fichier de sauvegarde SERVERS");
 
-                while (typeof srv.threads === "string") 
-                {
-                    srv.threads = JSON.parse(srv.threads);
+                const servers = await this._get_servers_table();
+
+                let backup = []
+                for (let srv of servers) {
+
+                    while (typeof srv.threads === "string") 
+                    {
+                        srv.threads = JSON.parse(srv.threads);
+                    }
+
+                    while (typeof srv.whitelist === "string")
+                    {
+                        srv.whitelist = JSON.parse(srv.whitelist);
+                    }
+
+                    backup.push({
+                        serverID: srv.serverID,
+                        owner: srv.owner,
+                        nswf: srv.nswf,
+                        language: srv.language,
+                        threads: JSON.stringify(srv.threads),
+                        whitelist: JSON.stringify(srv.whitelist),
+                        linkAssassin: srv.linkAssassin,
+                        badwords: srv.badwords
+                    });
+                }
+                
+                await this.erase(JSON.stringify(backup), "./data/backup_servers_latest.json");
+
+                console.log("Création du fichier de sauvegarde WARNS");
+
+                const warns = await this._get_warns_table();
+
+                backup = []
+
+                for (const warn of warns) {
+                    
+                    backup.push({
+                        serverID: warn.serverID,
+                        reason: warn.reason,
+                        user: warn.user
+                    });
                 }
 
-                while (typeof srv.whitelist === "string")
-                {
-                    srv.whitelist = JSON.parse(srv.whitelist);
+                await this.erase(JSON.stringify(backup), "./data/backup_warns_latest.json");
+
+
+                console.log("Création du fichier de sauvegarde LINKASSASSIN");
+
+                const linkAssassin = await this._get_linkassassin_table();
+
+
+                backup = [];
+
+                for (const links of linkAssassin) {
+                    
+                    backup.push({
+                        address: links.address,
+                        channels: links.channels,
+                        serverID: links.serverID
+                    });
                 }
 
-                backup.push({
-                    serverID: srv.serverID,
-                    owner: srv.owner,
-                    nswf: srv.nswf,
-                    language: srv.language,
-                    threads: JSON.stringify(srv.threads),
-                    whitelist: JSON.stringify(srv.whitelist),
-                    linkAssassin: srv.linkAssassin,
-                    badwords: srv.badwords
-                });
+                await this.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.json");
+
+        
+            } catch (e) {
+                console.log("Sauvegarde échouée " + e);
+                exit(1);
             }
-            
-            await this.erase(JSON.stringify(servers), "./data/backup_latest.json");
+
+           
+
     }
 
     _deploy() {

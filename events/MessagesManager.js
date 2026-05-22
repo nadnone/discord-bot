@@ -3,7 +3,7 @@ import QuoiFeurDetector from "../modules/QuoiFeurDetector.js";
 import BadwordsDetector from "../modules/BadwordsDetector.js";
 import LinkAssassin from "../modules/LinkAssassin.js";
 import fs from 'node:fs';
-import { DATABASE_KEYS, SERVERSLISTFILE } from "../tools/constants.js";
+import { DB_SERVERS_KEYS, SERVERSLISTFILE } from "../tools/constants.js";
 import ThreadsManager from "../modules/ThreadsManager.js";
 import Database from "../tools/Database.js";
 
@@ -22,7 +22,7 @@ export default class MessagesManager {
 
         client.on(Events.MessageCreate, async (interaction) => {
 
-            const server = await this.db.get_servers_info(DATABASE_KEYS.serverID, await interaction.guildId.toString());
+            const server = await this.db.get_servers(DB_SERVERS_KEYS.serverID, await interaction.guildId.toString());
             if (server.serverID == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
 
 

@@ -1,5 +1,5 @@
 import { ActivityType } from "discord.js";
-import { DATABASE_KEYS } from "../tools/constants.js";
+import { DB_SERVERS_KEYS } from "../tools/constants.js";
 
 export default class QuoiFeurDetector {
 
@@ -10,7 +10,7 @@ export default class QuoiFeurDetector {
 
     check(interaction, presence) {
 
-        const server = this.db.get_servers_info(DATABASE_KEYS.language, interaction.guildId.toString());
+        const server = this.db.get_servers(DB_SERVERS_KEYS.language, interaction.guildId.toString());
         
         if (server.languange !== "FR") return // si ce n'est pas un serveur francophone, on passe
 

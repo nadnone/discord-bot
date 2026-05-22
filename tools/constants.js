@@ -3,7 +3,7 @@ export const PERMISSIONS = {
     MODERATORS: "moderators",
     DEVELOPERS: "developers"
 }
-export const DATABASE_KEYS = {
+export const DB_SERVERS_KEYS = {
     owner: "owner",
     language: "language",
     threads: "threads",
@@ -11,11 +11,16 @@ export const DATABASE_KEYS = {
     serverID: "serverID",
     whitelist: "whitelist",
     linkAssassin: "linkAssassin",
+    linkAssassinID: "linkAssassinID",
     badwords: "badwords"
 };
-
+export const DB_LINKASSSASSIN_KEY = {
+    serverID: "serverID",
+    channel: "linkAssassin",
+    addresses: "addressses"
+};
 export const DATABASE_CHECK = [
-    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin", "badwords"
+    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin","linkAssassinID", "badwords"
 ];
 
 export const WARNJSONFILE = "./data/warns.json";

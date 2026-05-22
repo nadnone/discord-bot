@@ -1,7 +1,7 @@
 import { ActivityType } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR, DATABASE_CHECK, DATABASE_KEYS } from "../tools/constants.js";
+import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR, DATABASE_CHECK, DB_SERVERS_KEYS } from "../tools/constants.js";
 
 export default class BadwordsDetector {
 
@@ -27,8 +27,8 @@ export default class BadwordsDetector {
     async check(interaction, presence)
     {
         const serverID = await interaction.guildId.toString();
-        const server = await this.db.get_servers_info(DATABASE_KEYS.language, await serverID)
-        let enabled = await this.db.get_servers_info(DATABASE_KEYS.badwords, await serverID)
+        const server = await this.db.get_servers(DB_SERVERS_KEYS.language, await serverID)
+        let enabled = await this.db.get_servers(DB_SERVERS_KEYS.badwords, await serverID)
         if (enabled == null) enabled = false;
         else if (enabled.badwords === 0) return;
 

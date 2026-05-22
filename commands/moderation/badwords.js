@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { DATABASE_KEYS, PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, PERMISSIONS } from '../../tools/constants.js';
 
 export default {
 	permissions: PERMISSIONS.MODERATORS,
@@ -15,10 +15,10 @@ export default {
 
 		try {
 
-            const enabled = interaction.options.getBoolean("enable");
-            const serverID = interaction.guildId.toString();
+            const enabled = await interaction.options.getBoolean("enable");
+            const serverID = await interaction.guildId.toString();
 
-            await db.update_servers_info(DATABASE_KEYS.badwords, enabled ? 1 : 0, serverID);
+            await db.update_servers(DB_SERVERS_KEYS.badwords, enabled ? 1 : 0, serverID);
 
             if (enabled)
                 await interaction.reply({content: "enabled", flag: MessageFlags.Ephemeral});

@@ -1,7 +1,7 @@
-import { ActivityType } from "discord.js";
+import { ActivityType, MessageFlags } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { BLACKLISTFILE, BLACKLISTSFWFILE, DATABASE_KEYS, WHITELISTFILE } from "../tools/constants.js";
+import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, WHITELISTFILE } from "../tools/constants.js";
 
 export default class LinkAssassin {
 
@@ -42,14 +42,32 @@ export default class LinkAssassin {
     async check(interaction, presence)
     {
 
-        const enabled = await this.db.get_servers_info(DATABASE_KEYS.linkAssassin, await interaction.guildId.toString());
+        const serverID = await interaction.guildId.toString();
+        const channelId = await interaction.channelId.toString();
+        const enabled = await this.db.get_servers(DB_SERVERS_KEYS.linkAssassin, serverID);
         if (enabled.linkAssassin !== 1) return
+        
+        // check si c'est pareil sur tous le serveur ou non
+        let everychannels = false;
+        let whitelist = await this.db.get_linkAssassin(serverID, "ALL");
+        let locked = false;
 
+        if (whitelist == null)
+        {
+            locked = true; // on doit bloquer tous les liens
+        }
+    
         this.blacklist = []; // on clear 
 
-        let nude_link = interaction.content.toLowerCase();
+        let nude_link = await interaction.content.toLowerCase();
 
         if (!nude_link.match("https|http|ftp|ftps")) return; // si c'est pas un lien HTTP ou FTP on passe.
+
+        if (locked) 
+        {
+            await interaction.delete();
+            return true
+        }
 
         nude_link = nude_link
             .replace("http:", "")
@@ -58,9 +76,8 @@ export default class LinkAssassin {
             .trim()
 
 
-        const serverID = await this.db.get_servers_info(DATABASE_KEYS.serverID, await interaction.guildId.toString());
-        const lang = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString());
-        const nsfw = await this.db.get_servers_info(DATABASE_KEYS.nsfw, await interaction.guildId.toString());
+        const lang = await this.db.get_servers(DB_SERVERS_KEYS.language, serverID);
+        const nsfw = await this.db.get_servers(DB_SERVERS_KEYS.nsfw, serverID);
 
 
         if (lang.langage === "FR")
@@ -69,11 +86,31 @@ export default class LinkAssassin {
             presence.set("Checking a link è_é", ActivityType.Watching);
 
 
+        if (whitelist.addresses === "!ALL")
+        {
+            locked = true;
+            let all = await this.db.get_chan_linkAssassin(serverID, whitelist.addresses);
 
-        let allowed = await this.db.get_servers_info(DATABASE_KEYS.whitelist, await interaction.guildId.toString());
+            if (all == null) throw "bdd error";
+            else everychannels = true;                    
+        }
+
         
-        if (allowed.whitelist == null) return
-        if (allowed.whitelist.includes(nude_link)) return
+
+        if (everychannels && locked)
+        {
+            await interaction.delete();
+            return false
+        }
+        else if (!locked && whitelist.addresses.includes(nude_link))
+        {
+            return false;
+        }
+
+        // sinon on prend la whitelist par défaut
+        whitelist = this.db.read(WHITELISTFILE);
+        if (whitelist.includes(nude_link)) return false;
+
 
         if (nsfw.nsfw === 0) // si c'est un Safe for work server
         {
@@ -91,15 +128,15 @@ export default class LinkAssassin {
                             .replaceAll("^", "")
                             .trim()
             
-                            
+              
                 if (rslt.includes(nude_link) && lang.language === "FR") {
-                    await interaction.reply("Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.");
+                    await interaction.reply({ content: "Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.",flag: MessageFlags.Ephemeral});
                     await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction, this.db);
                     await interaction.delete();
                     return true
                 }
                 else if (rslt.includes(nude_link) && lang.language === "EN") {
-                    await interaction.reply("Not allowed link detected, if you think I'm wrong, please send a ticket.");
+                    await interaction.reply({content: "Not allowed link detected, if you think I'm wrong, please send a ticket.", flag: MessageFlags.Ephemeral});
                     await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interactio, this.db);
                     await interaction.delete();
                     return true

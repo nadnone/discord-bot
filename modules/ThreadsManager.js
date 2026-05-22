@@ -1,5 +1,5 @@
 import { ThreadAutoArchiveDuration } from 'discord.js';
-import { DATABASE_KEYS, SERVERSLISTFILE } from '../tools/constants.js'
+import {  DB_SERVERS_KEYS, SERVERSLISTFILE } from '../tools/constants.js'
 
 export default class ThreadsManager {
 
@@ -11,8 +11,8 @@ export default class ThreadsManager {
 
     async check(interaction, activityPresence) {
 
-        let raw_threads = await this.db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId.toString());
-        const lang = await this.db.get_servers_info(DATABASE_KEYS.language, await interaction.guildId.toString());
+        let raw_threads = await this.db.get_servers(DB_SERVERS_KEYS.threads, await interaction.guildId.toString());
+        const lang = await this.db.get_servers(DB_SERVERS_KEYS.language, await interaction.guildId.toString());
         if (raw_threads == null) return
 
         const threads = raw_threads.threads
