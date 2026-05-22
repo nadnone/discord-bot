@@ -74,8 +74,8 @@ export default class Database {
                 values.push(server.language);
                 values.push(JSON.stringify(threads));
                 values.push(JSON.stringify(server.whitelist)); 
-                values.push(0); // linkAssassin
-                values.push(0); // badWords
+                values.push(server.linkAssassin ? 1 : 0); // linkAssassin
+                values.push(server.badwords ? 1 : 0); // badWords
                 this.insert_new_server(values);
     
             }
@@ -228,6 +228,31 @@ export default class Database {
 
             const servers = await this._get_servers_list();
 
+            let backup = []
+            for (let srv of servers) {
+
+                while (typeof srv.threads === "string") 
+                {
+                    srv.threads = JSON.parse(srv.threads);
+                }
+
+                while (typeof srv.whitelist === "string")
+                {
+                    srv.whitelist = JSON.parse(srv.whitelist);
+                }
+
+                backup.push({
+                    serverID: srv.serverID,
+                    owner: srv.owner,
+                    nswf: srv.nswf,
+                    language: srv.language,
+                    threads: JSON.stringify(srv.threads),
+                    whitelist: JSON.stringify(srv.whitelist),
+                    linkAssassin: srv.linkAssassin,
+                    badwords: srv.badwords
+                });
+            }
+            
             await this.erase(JSON.stringify(servers), "./data/backup_latest.json");
     }
 
@@ -246,16 +271,6 @@ export default class Database {
             
             this._init(); // on recrée la bdd
 
-            const backup = this.read("./data/backup.json");
-
-            for (const srv of backup) {
- 
-                this.update_servers_info(DATABASE_KEYS.linkAssassin, srv.linkAssassin, srv.serverID);
-                this.update_servers_info(DATABASE_KEYS.whitelist, srv.whitelist, srv.serverID);
-                this.update_servers_info(DATABASE_KEYS.threads, srv.threads, srv.serverID);
-
-            }
-            
             
         } catch (e) {
             console.log(`${e} -> tools/Database.js:_deploy()`);

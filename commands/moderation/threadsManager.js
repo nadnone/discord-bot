@@ -27,13 +27,17 @@ export default {
             let rawdata = await db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId);
 
             // traitement de donnée (TODO à revoir)
-            let threads = JSON.parse(rawdata.threads); 
+            let threads = rawdata.threads;
+            if (threads == null) threads = [];
+            while (typeof threads === "string") {
+                threads = JSON.parse(threads)
+            }
 
             const alreadyExist = threads.includes(channel.id)
             
-            
             if (choice && !alreadyExist)
             {
+                
                 threads.push(channel.id);
 
                 await db.update_servers_info(DATABASE_KEYS.threads, JSON.stringify(threads), await interaction.guildId);
