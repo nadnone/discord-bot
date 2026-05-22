@@ -44,8 +44,7 @@ export default class CommitsLogger {
 
 
                 const channels = await client.channels.cache.forEach(async (chan) => {
-                    if (chan.name === UPDATES_ROOM_NAME &&
-                        chan.type === ChannelType.GuildText 
+                    if (chan.name === UPDATES_ROOM_NAME
                     ){
                             chan.send({embeds: [embed]})
                     }

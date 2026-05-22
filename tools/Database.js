@@ -2,7 +2,7 @@ import { dir, log } from "node:console";
 import { DATABASE_CHECK, DATABASE_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
 import fs from 'node:fs';
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { backup, DatabaseSync } from "node:sqlite";
 import { exec } from "node:child_process";
 
 export default class Database {
@@ -53,7 +53,7 @@ export default class Database {
     
             console.log("Création de la base de donnée");
             
-            let servers = await this.read("./data/servers.json")
+            let servers = await this.read("./data/backup.json")
             if (servers == null) throw "No server default database"
 
             for (const server of servers) {
@@ -65,10 +65,11 @@ export default class Database {
                 let threads = server.threads;
                 if (threads == null) threads = []
 
+
                 if (server.whitelist == null) server.whitelist = default_whitelist;
     
                 values.push(server.owner);
-                values.push(server.id);
+                values.push(server.serverID.toString());
                 values.push(server.NSFW ? 1 : 0);
                 values.push(server.language);
                 values.push(JSON.stringify(threads));
@@ -81,7 +82,6 @@ export default class Database {
     
 
 
-            this._backup();
             return true;
 
         } catch (e) {
@@ -209,9 +209,9 @@ export default class Database {
         await fs.writeFileSync(context, data);
     }
 
-    async read(context) {
+    read(context) {
         
-        return JSON.parse(await fs.readFileSync(context));
+        return JSON.parse(fs.readFileSync(context));
     }
     
     async _get_servers_list() {
@@ -228,10 +228,10 @@ export default class Database {
 
             const servers = await this._get_servers_list();
 
-            await this.erase(JSON.stringify(servers), "./data/backup.json");
+            await this.erase(JSON.stringify(servers), "./data/backup_latest.json");
     }
 
-    async _deploy() {
+    _deploy() {
 
         try {
 
@@ -240,13 +240,13 @@ export default class Database {
 
             console.log("Mise à jours de la base de donnée");
             
-            fs.unlinkSync(this.p)
+            fs.unlinkSync(this.p) // suppression de la bdd
             
             this.db = new DatabaseSync(this.p);
             
-            await this._init();
+            this._init(); // on recrée la bdd
 
-            const backup = await this.read("./data/backup.json");
+            const backup = this.read("./data/backup.json");
 
             for (const srv of backup) {
  

@@ -17,6 +17,7 @@ export default class ThreadsManager {
 
         const threads = raw_threads.threads
 
+        
         if (!threads.includes(await interaction.channel.id)) return
 
         // on récupère le dernier message pour controle
