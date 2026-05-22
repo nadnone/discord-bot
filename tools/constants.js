@@ -10,11 +10,12 @@ export const DATABASE_KEYS = {
     nsfw: "nsfw",
     serverID: "serverID",
     whitelist: "whitelist",
-    linkAssassin: "linkAssassin"
+    linkAssassin: "linkAssassin",
+    badwords: "badwords"
 };
 
 export const DATABASE_CHECK = [
-    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin"
+    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin", "badwords"
 ];
 
 export const WARNJSONFILE = "./data/warns.json";

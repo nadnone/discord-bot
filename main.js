@@ -6,7 +6,6 @@ import SlashCmdManager from './events/SlashCmdManager.js';
 import CommandsLoader from './modules/CommandsLoader.js';
 import BotReady from './events/BotReady.js';
 import path from 'node:path';
-import Address_checker from './modules/Address_checker.js';
 import fs, { mkdirSync } from 'node:fs';
 import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
@@ -39,7 +38,7 @@ export async function main() {
     new BotReady(client)
     
     const db = new Database(dirname);
-    db._backup();
+    //db._backup();
     db._deploy(); // pour les mises à niveau de la base de donnée
 
 

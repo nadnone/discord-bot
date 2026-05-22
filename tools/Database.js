@@ -37,7 +37,8 @@ export default class Database {
                 language TEXT NOT NULL, 
                 threads TEXT,
                 whitelist TEXT,
-                linkAssassin BOOLEAN NOT NULL
+                linkAssassin BOOLEAN NOT NULL,
+                badwords BOOLEAN NOT NULL
                 );
                 `);
 
@@ -53,17 +54,16 @@ export default class Database {
             console.log("Création de la base de donnée");
             
             let servers = await this.read("./data/servers.json")
-            if (servers == null) return
+            if (servers == null) throw "No server default database"
 
             for (const server of servers) {
 
-                const default_whitelist = ["youtube.com","google.com","google.fr","tiktok.com","facebook.com","google.ch","reddit.com"]
+                const default_whitelist = this.read("./config/whitelist.json");
 
                 let values = []
     
                 let threads = server.threads;
-                if (threads == null) threads = [];
-                threads = JSON.stringify(threads);
+                if (threads == null) threads = []
 
                 if (server.whitelist == null) server.whitelist = default_whitelist;
     
@@ -74,11 +74,14 @@ export default class Database {
                 values.push(JSON.stringify(threads));
                 values.push(JSON.stringify(server.whitelist)); 
                 values.push(0); // linkAssassin
+                values.push(0); // badWords
                 this.insert_new_server(values);
     
             }
     
 
+
+            this._backup();
             return true;
 
         } catch (e) {
@@ -91,11 +94,11 @@ export default class Database {
     async insert_new_server(values) {
 
         try {
-            if (values.length < 6) throw "not enough values";
+            if (values.length < 8) throw "not enough values";
     
             let insert = this.db.prepare(`
-                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist, linkAssassin)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist, linkAssassin, Badwords)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             `);
         
             await insert.run(...values)
@@ -228,7 +231,7 @@ export default class Database {
             await this.erase(JSON.stringify(servers), "./data/backup.json");
     }
 
-    _deploy() {
+    async _deploy() {
 
         try {
 
@@ -241,7 +244,17 @@ export default class Database {
             
             this.db = new DatabaseSync(this.p);
             
-            this._init();
+            await this._init();
+
+            const backup = await this.read("./data/backup.json");
+
+            for (const srv of backup) {
+ 
+                this.update_servers_info(DATABASE_KEYS.linkAssassin, srv.linkAssassin, srv.serverID);
+                this.update_servers_info(DATABASE_KEYS.whitelist, srv.whitelist, srv.serverID);
+                this.update_servers_info(DATABASE_KEYS.threads, srv.threads, srv.serverID);
+
+            }
             
             
         } catch (e) {

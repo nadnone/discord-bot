@@ -1,7 +1,7 @@
 import { Events } from "discord.js";
-import Address_checker from '../modules/Address_checker.js';
 import QuoiFeurDetector from "../modules/QuoiFeurDetector.js";
-import SwearsChecker from "../modules/LinkAssassin.js";
+import BadwordsDetector from "../modules/BadwordsDetector.js";
+import LinkAssassin from "../modules/LinkAssassin.js";
 import fs from 'node:fs';
 import { DATABASE_KEYS, SERVERSLISTFILE } from "../tools/constants.js";
 import ThreadsManager from "../modules/ThreadsManager.js";
@@ -12,9 +12,9 @@ export default class MessagesManager {
     constructor(db) {
         this.db = db;
 
-        this.addr_checker = new Address_checker(null, this.db);
+        this.addr_checker = new LinkAssassin(null, this.db);
         this.quoifeurDetector = new QuoiFeurDetector(this.db);
-        this.swearsChecker = new SwearsChecker(null, this.db);
+        this.swearsChecker = new BadwordsDetector(null, this.db);
         this.threadsManager = new ThreadsManager(null, this.db);
     }
 

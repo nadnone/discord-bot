@@ -27,7 +27,7 @@ export default {
             let rawdata = await db.get_servers_info(DATABASE_KEYS.threads, await interaction.guildId);
 
             // traitement de donnée (TODO à revoir)
-            let threads = JSON.parse(JSON.parse(rawdata.threads)); 
+            let threads = JSON.parse(rawdata.threads); 
 
             const alreadyExist = threads.includes(channel.id)
             
@@ -36,14 +36,14 @@ export default {
             {
                 threads.push(channel.id);
 
-                await db.update_servers_info(DATABASE_KEYS.threads, JSON.stringify(JSON.stringify(threads)), await interaction.guildId);
+                await db.update_servers_info(DATABASE_KEYS.threads, JSON.stringify(threads), await interaction.guildId);
                 await interaction.reply("Channel added");
                 return
             }
             else if (!choice && alreadyExist)
             {
                 threads = threads.filter(t => t !== channel.id);
-                await db.update_servers_info(DATABASE_KEYS.threads, JSON.stringify(JSON.stringify(threads)), await interaction.guildId);
+                await db.update_servers_info(DATABASE_KEYS.threads, JSON.stringify(threads), await interaction.guildId);
                 await interaction.reply("Channel removed");
                 return
 
