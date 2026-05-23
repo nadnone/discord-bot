@@ -231,9 +231,9 @@ export default class Database {
         return query.all();
     }
 
-    async get_chan_linkAssassin(serverID, whitelist) {
-        let query = this.db.prepare("SELECT channels FROM linkassassin WHERE serverID = ? AND addresses = ? ;");
-        return await query.get(serverID, whitelist);
+    async get_chan_linkAssassin(serverID) {
+        let query = this.db.prepare("SELECT channels FROM linkassassin WHERE serverID = ? ;");
+        return await query.all(serverID);
     }
 
     async get_linkAssassin(serverID, channel){

@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { DB_SERVERS_KEYS, PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, PERMISSIONS, WHITELISTFILE } from '../../tools/constants.js';
 
 
 async function check_db(db, serverID) {
@@ -16,7 +16,7 @@ async function check_db_chan(db, serverID, channel) {
 
 async function whitelist_check(whitelist, interaction) {
 
-	const list = whitelist.split(",");
+	const list = whitelist.replaceAll("https","").replaceAll("http", "").split(",");
 	
 	if (typeof list !== "object")
 	{
@@ -72,43 +72,80 @@ export default {
 
 			if (enabled && channel != null && whitelist != null && !alllink) // on filtre le channel avec les settings par défaut
 			{
-				const list = await whitelist_check(whitelist, interaction);
+				let list = await whitelist_check(whitelist, interaction);
+				
+				list = JSON.parse(list);
+				list.push("FILTER");
+				list = JSON.stringify(list);
+
 				if (list === false) return
 
 				await db.insert_linkAssassin(serverID, channel.id, list)
 			}
+			else if (enabled && channel == null && whitelist == null && !alllink) // setting par défaut partout
+			{
+				let default_whitelist = await db.read(WHITELISTFILE);
+				default_whitelist.push("FILTER")
+
+				await db.insert_linkAssassin(serverID, "ALL", JSON.stringify(default_whitelist))
+			}
 			else if (enabled && channel == null && whitelist != null && !alllink) // on filtre tout les salons sauf la whitelist
 			{
-				const list = await whitelist_check(whitelist, interaction);
+				let list = await whitelist_check(whitelist, interaction);
+
+				list = JSON.parse(list);
+				list.push("FILTER");
+				list = JSON.stringify(list);
+
 				if (list === false) return
 
 				await db.insert_linkAssassin(serverID, "ALL", list);
 			}
 			else if (enabled && channel == null && whitelist == null && alllink) // on bloque tout dans tous les salons
 			{
-				await db.insert_linkAssassin(serverID, "ALL", "!ALL");
+				let list = [];
+				list.push("ALL");
+				list = JSON.stringify(list);
+
+				await db.insert_linkAssassin(serverID, "ALL", list);
 			}
 			else if (enabled && channel != null && whitelist == null && alllink) // on bloque tous dans le salon
 			{
-				await db.insert_linkAssassin(serverID, channel.id, "!ALL");
+				let list = [];
+				list.push("ALL");
+				list = JSON.stringify(list);
+
+				await db.insert_linkAssassin(serverID, channel.id, list);
 			}
 			else if (enabled && channel != null && whitelist == null && !alllink) // on bloque tous avec les settings par défaut
 			{
-				await db.insert_linkAssassin(serverID, channel.id, "FALSE"); 
+				let list = [];
+				list.push("FILTER");
+				list = JSON.stringify(list);
+
+				await db.insert_linkAssassin(serverID, channel.id, list); 
 			}
 			else if (enabled && channel == null && whitelist != null && alllink) // on bloque tout sauf la whitelist
 			{
-				const list = await whitelist_check(whitelist, interaction);
+				let list = await whitelist_check(whitelist, interaction);
 				if (list === false) return
+
+				list = JSON.parse(list);
+				list.push("ALL");
+				list = JSON.stringify(list);
 				
 				await db.insert_linkAssassin(serverID, "ALL", list); 
 			}
-			else if (enabled && channel != null && whitelist != null & alllink) // on bloque tout dans le salon excepté la whitelist
+			else if (enabled && channel != null && whitelist != null && alllink) // on bloque tout dans le salon excepté la whitelist
 			{
-				const list = await whitelist_check(whitelist, interaction);
+				let list = await whitelist_check(whitelist, interaction);
 				if (list === false) return;
 
-				await db.insert_linkAssassin(serverID, "ALL", list);
+				list = JSON.parse(list);
+				list.push("ALL");
+				list = JSON.stringify(list);
+
+				await db.insert_linkAssassin(serverID, channel.id, list);
 			}
 
 

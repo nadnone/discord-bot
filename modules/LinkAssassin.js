@@ -47,6 +47,7 @@ export default class LinkAssassin {
         const enabled = await this.db.get_servers(DB_SERVERS_KEYS.linkAssassin, serverID);
         if (enabled.linkAssassin !== 1) return false
         
+        
         // check si c'est pareil sur tous le serveur ou non
         let everychannels = false;
         let whitelist = await this.db.get_linkAssassin(serverID, "ALL");
@@ -54,25 +55,32 @@ export default class LinkAssassin {
 
         if (whitelist == null)
         {
-            locked = true; // on doit bloquer tous les liens
+            locked = true;
         }
-    
+        else if (whitelist.addresses.includes("ALL"))
+        {
+            let chan = await this.db.get_chan_linkAssassin(serverID);
+            for (const c of chan) {
+                if (c.channels.includes("ALL"))
+                {
+                    locked = true
+                    everychannels = true
+                    break
+                }
+            }
+        }
+
         this.blacklist = []; // on clear 
 
         let nude_link = await interaction.content.toLowerCase();
 
         if (!nude_link.match("https|http|ftp|ftps")) return false; // si c'est pas un lien HTTP ou FTP on passe.
 
-        if (locked) 
-        {
-            await interaction.delete();
-            return true
-        }
-
         nude_link = nude_link
             .replace("http:", "")
             .replace("https:", "")
-            .replaceAll("\/", "")
+            .replaceAll("\/\/", "")
+            .split("/")[0]
             .trim()
 
 
@@ -80,36 +88,86 @@ export default class LinkAssassin {
         const nsfw = await this.db.get_servers(DB_SERVERS_KEYS.nsfw, serverID);
 
 
-        if (lang.langage === "FR")
-            presence.set("Verifie un lien è_é", ActivityType.Watching);
-        else 
-            presence.set("Checking a link è_é", ActivityType.Watching);
-
-
-        if (whitelist.addresses === "!ALL")
+        let all = null;
+        if (whitelist == null && !locked)
+        {
+            // pas de whitelist mais pas forcément locked
+            locked = false;
+        }
+        else if (whitelist == null) 
+        {
+            whitelist = await this.db.get_linkAssassin(serverID, channelId)
+        }
+        else if (whitelist.addresses.includes("ALL"))
         {
             locked = true;
-            let all = await this.db.get_chan_linkAssassin(serverID, whitelist.addresses);
-
-            if (all == null) throw "bdd error";
-            else everychannels = true;                    
         }
 
+        all = await this.db.get_chan_linkAssassin(serverID);
+        if (all == null) return false;
         
+        let channelFound = false;
+        for (const chan of all) {
+            if (chan.channels === channelId)
+            {
+                channelFound = true;
+                break
+            }
+        }
 
-        if (everychannels && locked)
+
+
+
+
+
+        if (locked && ( everychannels || channelFound ) && whitelist.addresses.includes("FILTER"))
         {
+            if (whitelist.addresses.includes(nude_link)) return false;
+        }
+        else if (locked && !( channelFound || everychannels ) && !whitelist.addresses.includes("ALL"))
+        {
+            await interaction.delete();
+            return true;
+        }
+        else if (locked && everychannels && whitelist.addresses.includes("ALL")) 
+        {
+            if (whitelist.addresses.includes(nude_link)) return false;
+
+            await interaction.delete();
+            return true;
+        }
+        else if (locked && channelFound && whitelist.addresses.includes("ALL"))
+        {
+            if (whitelist.addresses.includes(nude_link)) return false;
+
             await interaction.delete();
             return true
         }
-        else if (!locked && whitelist.addresses.includes(nude_link))
+        else if (locked && everychannels) 
         {
+            if (whitelist.addresses.includes(nude_link)) return false;
+            
+            await interaction.delete()
             return true;
         }
+        else if (!locked && channelFound && !whitelist.addresses.includes("FILTER"))
+        {
+            if (whitelist.addresses.includes(nude_link)) return false;
+        }
+        else if (locked && channelFound && whitelist.addresses.includes("ALL"))
+        {
+            if (whitelist.addresses.includes(nude_link)) return false;
 
-        // sinon on prend la whitelist par défaut
-        whitelist = this.db.read(WHITELISTFILE);
-        if (whitelist.includes(nude_link)) return true;
+            await interaction.delete()
+            return true;
+        }
+    
+        
+
+        // on prend la whitelist par défaut
+        if (typeof whitelist.addresses != "object")
+            whitelist = {"addresses": await this.db.read(WHITELISTFILE)};
+        if (whitelist.addresses.includes(nude_link)) return false;
 
 
         if (nsfw.nsfw === 0) // si c'est un Safe for work server
