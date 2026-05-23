@@ -5,16 +5,16 @@ import { PERMISSIONS } from '../../tools/constants.js';
 export default {
 	permissions: PERMISSIONS.MODERATORS,
 	data: new SlashCommandBuilder().setName('purge')
-			.setDescription("(Be careful !) Purge ALL the messages of a member")
+			.setDescription("(Attention !) Supprimer TOUS les messages d'un membre (dans TOUS le serveur)")
 			.addUserOption((option) =>
 				option.setName("cible")
-					.setDescription("The user you want to wipe")
+					.setDescription("Le membre que tu souhaites effacer")
 					.setRequired(true)),
 	async execute(interaction) {
 
 		let interval = [];
 		const demandeFrom = await interaction.user;
-		const replymsg =`${demandeFrom}, I'll mention you when I'm finished. Please wait, this is a slow process..`
+		const replymsg =`${demandeFrom}, Je vais te ping quand j'ai fini, c'est un processus long...`
 		try {
 
 			await interaction.reply({content: replymsg, flag: MessageFlags.Ephemeral})
@@ -36,7 +36,7 @@ export default {
 				
 				if (interval.length <= 0) 
 				{
-					await interaction.editReply(`${demandeFrom} Member wiped from the whole server`);
+					await interaction.editReply(`${demandeFrom} Membre effacé de tous le serveur.`);
 					clearInterval(checker)
 					checker = null;
 					return
@@ -58,14 +58,14 @@ export default {
 				const msgs = allmsgs.filter(m => m.author.id === cibleID && m.deletable === true && m.content !== replymsg);
 				
 				if (msgs == null) {
-					await interaction.editReply(`${demandeFrom} Nothing to purge`)
+					await interaction.editReply(`${demandeFrom} Rien à effacer.`)
 					let tmp = interval[i];
 					clearInterval(tmp)
 					interval = interval.splice(i, 1);
 					return 
 				}
 				else if (msgs.size <= 0){
-					await interaction.editReply(`${editReply} ${channel[1].name} finished`)
+					await interaction.editReply(`${editReply} ${channel[1].name} -> salon traité.`)
 					let tmp = interval[i];
 					clearInterval(tmp)
 					interval = interval.splice(i, 1);

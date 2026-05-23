@@ -20,7 +20,7 @@ async function whitelist_check(whitelist, interaction) {
 	
 	if (typeof list !== "object")
 	{
-		await interaction.reply({content: "Bad whitelist format", flag: MessageFlags.Ephemeral});
+		await interaction.reply({content: "Mauvais whitelist format", flag: MessageFlags.Ephemeral});
 		return false
 	}
 	
@@ -30,22 +30,22 @@ async function whitelist_check(whitelist, interaction) {
 export default {
 	permissions: PERMISSIONS.MODERATORS,
 	data: new SlashCommandBuilder().setName('linkassassin')
-			.setDescription("Manage the links checker")
+			.setDescription("Gérer les liens sur ton serveur")
 			.addBooleanOption((option) =>
 				option.setName("enable")
-					.setDescription("True: enable, False, disable")
+					.setDescription("True: Activé, False, Désactivé")
 					.setRequired(true))
 			.addChannelOption(option => 
 				option.setName("channel")
-					.setDescription("channel you want to filter")
+					.setDescription("Le salon que tu souhaites filtrer")
 					.setRequired(false))
 			.addStringOption(option => 
 				option.setName("whitelist")
-					.setDescription("exemple: google.com, youtube.com, example.com")
+					.setDescription("La liste des adresses autorisées -> exemple: google.com, youtube.com, example.com")
 					.setRequired(false))
 			.addBooleanOption(option => 
 				option.setName("all")
-					.setDescription("if you want to lock all links from the channel")
+					.setDescription("True : Bloquer tous les liens; False : Filtrer normalement")
 					.setRequired(false)),
 
     async execute(interaction, db) {
@@ -116,9 +116,9 @@ export default {
 
 			
             if (enabled)
-                await interaction.reply({content: "enabled", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: "Activé", flag: MessageFlags.Ephemeral});
             else 
-                await interaction.reply({content: "disabled", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: "Désactivé", flag: MessageFlags.Ephemeral});
 			
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> cmds/linkAssassin.js`);

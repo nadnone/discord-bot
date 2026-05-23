@@ -7,14 +7,14 @@ import fs from 'node:fs';
 export default {
 	permissions: PERMISSIONS.MODERATORS,
 	data: new SlashCommandBuilder().setName('threadsmanager')
-			.setDescription("Add or remove a threads channel")
+			.setDescription("Ajouter un supprimer un salon à fils")
 			.addChannelOption(option =>
 				option.setName("channel")
-                .setDescription("the channel you want to add or remove")
+                .setDescription("Le salon que tu souhaites ajouter ou supprimer")
                 .setRequired(true)
 			).addBooleanOption(option => 
                 option.setName("choix")
-                .setDescription("true : add, false: remove")
+                .setDescription("True : Ajouter, False: Supprimer")
                 .setRequired(true)
             ),
 	async execute(interaction, db) {

@@ -8,7 +8,7 @@ export default {
 			.setDescription("Manage the badwords checker")
 			.addBooleanOption((option) =>
 				option.setName("enable")
-					.setDescription("True: enable, False, disable")
+					.setDescription("True: Activer, False, Désactiver")
 					.setRequired(true)),
 
     async execute(interaction, db) {
@@ -21,9 +21,9 @@ export default {
             await db.update_servers(DB_SERVERS_KEYS.badwords, enabled ? 1 : 0, serverID);
 
             if (enabled)
-                await interaction.reply({content: "enabled", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: "Activé", flag: MessageFlags.Ephemeral});
             else 
-                await interaction.reply({content: "disabled", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: "Désactivé", flag: MessageFlags.Ephemeral});
 			
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> cmds/badwords.js`);
