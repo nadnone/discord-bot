@@ -26,8 +26,7 @@ export default class MessagesManager {
             if (server.serverID == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
 
 
-            let bad = this.addr_checker.check(interaction, activityPresence);
-            bad &= this.swearsChecker.check(interaction, activityPresence);
+            let bad = this.addr_checker.check(interaction, activityPresence) || this.swearsChecker.check(interaction, activityPresence);
             
             if (bad === true) return;
             

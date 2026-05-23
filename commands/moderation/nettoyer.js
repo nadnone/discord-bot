@@ -23,8 +23,6 @@ export default {
 			await interaction.reply("J'y travaille...");
 
 			let max = parseInt(interaction.options.getString("nombre"));
-
-			const channels = await interaction.guild.channels.fetch();
 			const textchannel = await interaction.channel
 			
 			let interval = setInterval(async () => {

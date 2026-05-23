@@ -45,7 +45,7 @@ export default class LinkAssassin {
         const serverID = await interaction.guildId.toString();
         const channelId = await interaction.channelId.toString();
         const enabled = await this.db.get_servers(DB_SERVERS_KEYS.linkAssassin, serverID);
-        if (enabled.linkAssassin !== 1) return
+        if (enabled.linkAssassin !== 1) return false
         
         // check si c'est pareil sur tous le serveur ou non
         let everychannels = false;
@@ -61,7 +61,7 @@ export default class LinkAssassin {
 
         let nude_link = await interaction.content.toLowerCase();
 
-        if (!nude_link.match("https|http|ftp|ftps")) return; // si c'est pas un lien HTTP ou FTP on passe.
+        if (!nude_link.match("https|http|ftp|ftps")) return false; // si c'est pas un lien HTTP ou FTP on passe.
 
         if (locked) 
         {
@@ -100,16 +100,16 @@ export default class LinkAssassin {
         if (everychannels && locked)
         {
             await interaction.delete();
-            return false
+            return true
         }
         else if (!locked && whitelist.addresses.includes(nude_link))
         {
-            return false;
+            return true;
         }
 
         // sinon on prend la whitelist par défaut
         whitelist = this.db.read(WHITELISTFILE);
-        if (whitelist.includes(nude_link)) return false;
+        if (whitelist.includes(nude_link)) return true;
 
 
         if (nsfw.nsfw === 0) // si c'est un Safe for work server
