@@ -122,7 +122,7 @@ export default class Database {
     
             console.log("Actualisation de la table warns");
             
-            data = await this.read("./data/backups_warns_latest.json")
+            data = await this.read("./data/backup_warns_latest.json")
             if (data == null) throw "No warns default database"
 
             for (const backup of data) {
@@ -130,9 +130,15 @@ export default class Database {
             }
     
 
-    
-    
+            console.log("Actualisation de la table imageKiller");
+            
+            data = await this.read("./data/backup_imageskiller_latest.json")
+            if (data == null) throw "No warns default database"
 
+            for (const backup of data) {
+                this.insert_new_images_rules(backup.formats, backup.channels, backup.serverID);
+            }
+    
 
             return true;
 
@@ -141,6 +147,12 @@ export default class Database {
             
         }
 
+    }
+
+    _get_imageskiller_table()
+    {
+        let query = this.sql.prepare("SELECT * FROM imagesKiller;")
+        return query.all();
     }
 
     get_images_rules(channel, serverID) 

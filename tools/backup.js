@@ -69,6 +69,24 @@ export default async function backup(db) {
 
                 await db.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.json");
 
+
+                console.log("Création du fichier de sauvegarde IMAGESKILLER");
+
+                let data = db._get_imageskiller_table();
+
+                backup = [];
+
+                for (const el of data) {
+                    
+                    backup.push({
+                        formats: el.formats,
+                        channels: el.channels,
+                        serverID: el.serverID
+                    });
+                }
+
+                await db.erase(JSON.stringify(backup), "./data/backup_imageskiller_latest.json");
+
         
             } catch (e) {
                 console.log("Sauvegarde échouée " + e);
