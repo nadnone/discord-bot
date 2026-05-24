@@ -59,9 +59,9 @@ export default class Database {
                 serverID TEXT NOT NULL
             );
             `);
-            console.log("Création de la base de donnée");
+            console.log("Création de la table servers");
             
-            let servers = await this.read("./data/backup.json")
+            let servers = await this.read("./data/backup_servers_latest.json")
             if (servers == null) throw "No server default database"
 
             for (const server of servers) {
@@ -85,6 +85,25 @@ export default class Database {
                 values.push(server.linkAssassin ? 1 : 0); // linkAssassin
                 values.push(server.badwords ? 1 : 0); // badWords
                 this.insert_new_server(values);
+    
+            }
+            
+              console.log("Création de la table linkassassin");
+            
+            const data = await this.read("./data/backup_linkassassin_latest.json")
+            if (data == null) throw "No linkassassin default database"
+
+            for (const backup of data) {
+
+                let check = JSON.parse(backup.address);
+                
+                if (check.length === 0) 
+                {
+                    check.push("FILTER");
+                }
+                check = JSON.stringify(check);
+
+                this.insert_linkAssassin(backup.serverID, backup.channels, check);
     
             }
     
@@ -325,6 +344,7 @@ export default class Database {
                 }
                 
                 await this.erase(JSON.stringify(backup), "./data/backup_servers_latest.json");
+                await this.erase(JSON.stringify(backup), "./data/backup_servers_latest.bak");
 
                 console.log("Création du fichier de sauvegarde WARNS");
 
@@ -342,6 +362,7 @@ export default class Database {
                 }
 
                 await this.erase(JSON.stringify(backup), "./data/backup_warns_latest.json");
+                await this.erase(JSON.stringify(backup), "./data/backup_warns_latest.bak");
 
 
                 console.log("Création du fichier de sauvegarde LINKASSASSIN");
@@ -354,13 +375,14 @@ export default class Database {
                 for (const links of linkAssassin) {
                     
                     backup.push({
-                        address: links.address,
+                        address: links.addresses,
                         channels: links.channels,
                         serverID: links.serverID
                     });
                 }
 
                 await this.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.json");
+                await this.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.bak");
 
         
             } catch (e) {
@@ -377,7 +399,8 @@ export default class Database {
         try {
 
             // protection anti perte de données
-            if (!fs.existsSync("./data/backup.json")) return
+            if (!fs.existsSync("./data/backup_servers_latest.json")) return
+            if (!fs.existsSync("./data/backup_linkassassin_latest.json")) return
 
             console.log("Mise à jours de la base de donnée");
             

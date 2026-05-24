@@ -41,7 +41,7 @@ export default {
 					.setRequired(false))
 			.addStringOption(option => 
 				option.setName("whitelist")
-					.setDescription("La liste des adresses autorisées -> exemple: google.com, youtube.com, example.com")
+					.setDescription("La liste des adresses autorisées (ou non avec '!') -> exemple: google.com, !youtube.com, example.com")
 					.setRequired(false))
 			.addBooleanOption(option => 
 				option.setName("all")
@@ -79,6 +79,7 @@ export default {
 				list = JSON.stringify(list);
 
 				if (list === false) return
+
 
 				await db.insert_linkAssassin(serverID, channel.id, list)
 			}

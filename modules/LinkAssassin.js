@@ -1,7 +1,7 @@
 import { ActivityType, MessageFlags } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, WHITELISTFILE } from "../tools/constants.js";
+import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, LOGCOMMITSFILE, WHITELISTFILE } from "../tools/constants.js";
 
 export default class LinkAssassin {
 
@@ -39,6 +39,22 @@ export default class LinkAssassin {
 
     }
 
+    async whitelist_check(whitelist, nude_link, interaction) {
+        
+        if (whitelist.addresses.includes(`!${nude_link}`))
+        {
+            await interaction.delete()
+            return true;
+        }
+        if (whitelist.addresses.includes("ALL") && !whitelist.addresses.includes(nude_link))
+        {
+            await interaction.delete();
+            return true;
+        }
+
+        return false
+    }
+
     async check(interaction, presence)
     {
 
@@ -57,7 +73,7 @@ export default class LinkAssassin {
         {
             locked = true;
         }
-        else if (whitelist.addresses.includes("ALL"))
+        else if (whitelist.addresses.includes("ALL") || whitelist.addresses.includes("FILTER"))
         {
             let chan = await this.db.get_chan_linkAssassin(serverID);
             for (const c of chan) {
@@ -87,12 +103,11 @@ export default class LinkAssassin {
         const lang = await this.db.get_servers(DB_SERVERS_KEYS.language, serverID);
         const nsfw = await this.db.get_servers(DB_SERVERS_KEYS.nsfw, serverID);
 
-
         let all = null;
         if (whitelist == null && !locked)
         {
             // pas de whitelist mais pas forcément locked
-            locked = false;
+            locked = false; 
         }
         else if (whitelist == null) 
         {
@@ -115,59 +130,26 @@ export default class LinkAssassin {
             }
         }
 
-
-
-
-
-
-        if (locked && ( everychannels || channelFound ) && whitelist.addresses.includes("FILTER"))
+        if (( everychannels || channelFound ) && whitelist.addresses.includes("FILTER"))
         {
-            if (whitelist.addresses.includes(nude_link)) return false;
+           if (await this.whitelist_check(whitelist, nude_link, interaction))
+               return true
         }
-        else if (locked && !( channelFound || everychannels ) && !whitelist.addresses.includes("ALL"))
+        else if (locked && ( channelFound || everychannels ) && whitelist.addresses.includes("ALL")) 
         {
-            await interaction.delete();
-            return true;
+            return await this.whitelist_check(whitelist, nude_link, interaction)
         }
-        else if (locked && everychannels && whitelist.addresses.includes("ALL")) 
-        {
-            if (whitelist.addresses.includes(nude_link)) return false;
+      
 
-            await interaction.delete();
-            return true;
-        }
-        else if (locked && channelFound && whitelist.addresses.includes("ALL"))
-        {
-            if (whitelist.addresses.includes(nude_link)) return false;
-
-            await interaction.delete();
-            return true
-        }
-        else if (locked && everychannels) 
-        {
-            if (whitelist.addresses.includes(nude_link)) return false;
-            
-            await interaction.delete()
-            return true;
-        }
-        else if (!locked && channelFound && !whitelist.addresses.includes("FILTER"))
-        {
-            if (whitelist.addresses.includes(nude_link)) return false;
-        }
-        else if (locked && channelFound && whitelist.addresses.includes("ALL"))
-        {
-            if (whitelist.addresses.includes(nude_link)) return false;
-
-            await interaction.delete()
-            return true;
-        }
-    
         
-
+        
         // on prend la whitelist par défaut
-        if (typeof whitelist.addresses != "object")
-            whitelist = {"addresses": await this.db.read(WHITELISTFILE)};
-        if (whitelist.addresses.includes(nude_link)) return false;
+        const defaultwl = await this.db.read(WHITELISTFILE);
+        if (whitelist == null) whitelist = {"addresses": defaultwl};
+        else whitelist.addresses.concat(defaultwl);
+
+        // dernier teste de whitelist avant le gros teste de blacklist
+        if (whitelist.addresses.includes(nude_link)) return
 
 
         if (nsfw.nsfw === 0) // si c'est un Safe for work server

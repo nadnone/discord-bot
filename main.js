@@ -11,6 +11,10 @@ import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, 
 import { exec } from 'node:child_process';
 import Database from './tools/Database.js';
 
+
+let db = null;
+
+
 export async function main() {
 
     await load_folders() // verification des dossiers manquants
@@ -37,9 +41,9 @@ export async function main() {
     const dirname = import.meta.dirname;
     new BotReady(client)
     
-    const db = new Database(dirname);
-    db._backup();
-    db._deploy(); // pour les mises à niveau de la base de donnée
+    db = new Database(dirname);
+    await db._backup();
+    await db._deploy(); // pour les mises à niveau de la base de donnée
 
 
     const presence = new ActivityPresence(client);
