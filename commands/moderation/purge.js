@@ -27,57 +27,58 @@ export default {
 			let i = 0;
 			for (const channel of channels) {
 
-				let inter = setInterval(checkmsgs, 2_500, channel, i++)
+				let inter = setInterval(checkmsgs, 300, channel, i++)
 				interval.push(inter);
 			}
 
 			let checker = setInterval(async () => {
-				console.log(interval.length);
 				
 				if (interval.length <= 0) 
 				{
-					await interaction.editReply(`${demandeFrom} Membre effacé de tous le serveur.`);
+					await interaction.followUp(`${demandeFrom} Membre effacé de tous le serveur.`);
 					clearInterval(checker)
-					checker = null;
+					checker = false;
 					return
 				}
-			}, 500);
+				interval = interval.filter(i => i != false)
+				
+					
+
+			}, 300);
 
 			async function checkmsgs(channel, i) {
 				
-				if (checker == null)
+				if (checker === false)
 				{
 					clearInterval(interval[i]);
+					interval[i] = false;
 					return
 				}
 
-				const editReply =`${demandeFrom} Purge for`
+				const editReply =`${demandeFrom} Purge de`
 
 				const allmsgs = await channel[1].messages.fetch({limit: 100, cache: false})
 
 				const msgs = allmsgs.filter(m => m.author.id === cibleID && m.deletable === true && m.content !== replymsg);
-				
+
+
 				if (msgs == null) {
-					await interaction.editReply(`${demandeFrom} Rien à effacer.`)
+					await interaction.editReply(`${demandeFrom}, Rien à effacer.`)
 					let tmp = interval[i];
 					clearInterval(tmp)
-					interval = interval.splice(i, 1);
+					interval[i] = false
 					return 
 				}
 				else if (msgs.size <= 0){
-					await interaction.editReply(`${editReply} ${channel[1].name} -> salon traité.`)
+					await interaction.editReply(`${editReply} ${channel[1].name} -> salon traité. (Pas encore fini)`)
 					let tmp = interval[i];
 					clearInterval(tmp)
-					interval = interval.splice(i, 1);
+					interval[i] = false
 					return
-				}
-				else {
-					await interaction.editReply(replymsg)
 				}
 
 				for (const msg of msgs) {
-					
-					setTimeout(deleteMsg, 300, msg);
+					await setTimeout(deleteMsg, 300, msg);
 				}
 
 				async function deleteMsg(msg) {
@@ -85,14 +86,15 @@ export default {
 					try {
 						if (await msg[1] == null)
 						{
-							return
+							throw 400
 						}
 						else if (await msg[1].content.toString().includes(editReply))
 						{
-							return
+							return 500
 						}
 						else if (await msg[1].deletable)
 							await msg[1].delete();
+
 						
 					} catch (e) {
 						if (e.code === 10008) // si le message n'est pas connu

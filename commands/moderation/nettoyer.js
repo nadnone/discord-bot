@@ -43,14 +43,14 @@ export default {
 						return
 					} 
 					
-					if (msg != null)
+					if (msg != null && msg.deletable !== false)
 					{
 						msg.delete().catch(e => {--max})
 						--max;
 					}
 				});
 
-			}, 2_500);
+			}, 500);
 
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> nettoyer.js`);
