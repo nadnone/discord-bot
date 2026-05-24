@@ -16,7 +16,7 @@ export default {
 				.setRequired(false))
 			.addStringOption(option => 
 				option.setName("type")
-					.setDescription("Type de fichiers à filtrer: video, image (type MIME)")
+					.setDescription("Type de fichiers, exemple: video, image, application (type MIME)")
 					.setRequired(false)),
 
     async execute(interaction, db) {
@@ -28,12 +28,20 @@ export default {
             const type = await interaction.options.getString("type")
             const serverID = await interaction.guildId.toString();
 
-			if (!SUPPORTED_MIMETYPE.includes(type) && enabled)
-			{
-				await interaction.reply("type MIME non supporté");
-				return;
+
+			let mimetype = type.replaceAll(" ", "").trim().split(",");
+
+			for (const el of mimetype) {
+
+				if (!SUPPORTED_MIMETYPE.includes(el) && enabled)
+				{
+					await interaction.reply(`type ${el} non supporté`);
+					return
+				}
 			}
-			else if (channel == null && enabled) 
+
+			
+			if (channel == null && enabled) 
 			{
 				await interaction.reply("Salon manquant");
 				return
@@ -44,8 +52,10 @@ export default {
                 await interaction.reply({content: "Désactivé", flag: MessageFlags.Ephemeral});
 				return
 			}
+8
+			mimetype = JSON.stringify(mimetype);
 
-			db.insert_new_images_rules(type.toString(), channel.id.toString(), serverID);
+			db.insert_new_images_rules(mimetype, channel.id.toString(), serverID);
 			db.update_servers(DB_SERVERS_KEYS.imagesKiller, enabled ? 1 : 0, serverID);
 
 			await interaction.reply({content: "Activé", flag: MessageFlags.Ephemeral});

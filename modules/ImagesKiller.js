@@ -22,11 +22,16 @@ export default class ImagesKiller {
         const rules = this.db.get_images_rules(channelId, serverID);
         if (rules == null) return false;
 
-        const isImage = await message.attachments.find(c => c.contentType.includes(rules.formats)) != null
-        if (isImage) 
-        {
-            await interaction.delete();
-            return true;
+
+        for (const type of rules.formats) {
+
+            const isImage = await message.attachments.find(c => c.contentType.includes(type)) != null
+            if (isImage) 
+            {
+                await interaction.delete();
+                return true;
+            }
+            
         }
 
         return false;
