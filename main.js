@@ -10,13 +10,14 @@ import fs, { mkdirSync } from 'node:fs';
 import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
 import Database from './tools/Database.js';
+import backup from './tools/backup.js';
+import update from './tools/deployement.js';
+import { argv } from 'node:process';
 
 
-let db = null;
 
-
-export async function main() {
-
+export async function main(argv) {
+    
     await load_folders() // verification des dossiers manquants
     await load_files(); // verification de fichiers manquants
 
@@ -41,9 +42,10 @@ export async function main() {
     const dirname = import.meta.dirname;
     new BotReady(client)
     
-    db = new Database(dirname);
-    await db._backup();
-    await db._deploy(); // pour les mises à niveau de la base de donnée
+    let db = new Database(dirname);
+
+    if (argv.includes("--update")) // seulement avec l'argument --update
+        await update(dirname, db); // pour les mises à niveau de la base de donnée
 
 
     const presence = new ActivityPresence(client);
@@ -72,9 +74,8 @@ async function load_files() {
 
         let data = [];
 
-        data.push({name: WARNJSONFILE, status: await fs.existsSync(WARNJSONFILE)});
         data.push({name: BLACKLISTFILE, status: await fs.existsSync(BLACKLISTFILE)});
-        data.push({name: WARNJSONFILE, status: await fs.existsSync(WHITELISTFILE)});
+        data.push({name: WHITELISTFILE, status: await fs.existsSync(WHITELISTFILE)});
         data.push({name: LOGCOMMITSFILE, status: await fs.existsSync(LOGCOMMITSFILE)});
         data.push({name: BLACKLISTSFWFILE, status: await fs.existsSync(BLACKLISTSFWFILE)});
         data.push({name: SERVERSLISTFILE, status: await fs.existsSync(SERVERSLISTFILE)});
@@ -121,5 +122,5 @@ async function load_folders() {
 }
 
 
-main();
+main(argv);
 

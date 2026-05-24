@@ -12,7 +12,8 @@ export const DB_SERVERS_KEYS = {
     whitelist: "whitelist",
     linkAssassin: "linkAssassin",
     linkAssassinID: "linkAssassinID",
-    badwords: "badwords"
+    badwords: "badwords",
+    imagesKiller: "imagesKiller"
 };
 export const DB_LINKASSSASSIN_KEY = {
     serverID: "serverID",
@@ -20,8 +21,13 @@ export const DB_LINKASSSASSIN_KEY = {
     addresses: "addressses"
 };
 export const DATABASE_CHECK = [
-    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin","linkAssassinID", "badwords"
+    "owner", "language", "threads", "nsfw", "serverID", "whitelist", "linkAssassin","linkAssassinID", "badwords", "imagesKiller"
 ];
+
+export const SUPPORTED_MIMETYPE = [
+    "image", "video", "application"
+]
+
 
 export const WARNJSONFILE = "./data/warns.json";
 export const DEVELOPERSJSONFILE = "./config/developers.json";

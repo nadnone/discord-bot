@@ -2,8 +2,9 @@ import { dir, log } from "node:console";
 import { DATABASE_CHECK, DB_SERVERS_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
 import fs from 'node:fs';
 import path from "node:path";
-import { backup, DatabaseSync } from "node:sqlite";
+import { DatabaseSync } from "node:sqlite";
 import { exec } from "node:child_process";
+import backup from "./backup.js";
 
 export default class Database {
 
@@ -13,12 +14,12 @@ export default class Database {
 
         if (!fs.existsSync(this.p))
         {
-            this.db = new DatabaseSync(this.p);
+            this.sql = new DatabaseSync(this.p);
             this._init();
             return
         }
 
-        this.db = new DatabaseSync(this.p);
+        this.sql = new DatabaseSync(this.p);
 
     }
 
@@ -28,69 +29,81 @@ export default class Database {
             
             console.log("Initialisation de la base de donnée");
             
-            this.db.exec(`
+            this.sql.exec(`
                 CREATE TABLE servers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                owner TEXT NOT NULL, 
-                serverID TEXT NOT NULL, 
-                nsfw BOOLEAN NOT NULL,
-                language TEXT NOT NULL, 
-                threads TEXT,
-                whitelist TEXT,
-                linkAssassin BOOLEAN NOT NULL,
-                badwords BOOLEAN NOT NULL
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    owner TEXT NOT NULL, 
+                    serverID TEXT NOT NULL, 
+                    nsfw BOOLEAN NOT NULL,
+                    language TEXT NOT NULL, 
+                    threads TEXT,
+                    whitelist TEXT,
+                    linkAssassin BOOLEAN NOT NULL,
+                    badwords BOOLEAN NOT NULL,
+                    imagesKiller BOOLEAN NOT NULL
                 );
                 `);
 
-            this.db.exec(`
+            this.sql.exec(`
                 CREATE TABLE warns (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user TEXT NOT NULL, 
-                reason TEXT NOT NULL,
-                serverID TEXT NOT NULL
-            );
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user TEXT NOT NULL, 
+                    reason TEXT NOT NULL,
+                    serverID TEXT NOT NULL
+                );
             `);
     
-             this.db.exec(`
+             this.sql.exec(`
                 CREATE TABLE linkassassin (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                addresses TEXT NOT NULL, 
-                channels TEXT NOT NULL,
-                serverID TEXT NOT NULL
-            );
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    addresses TEXT NOT NULL, 
+                    channels TEXT NOT NULL,
+                    serverID TEXT NOT NULL
+                );
             `);
-            console.log("Création de la table servers");
+
+            this.sql.exec(`
+                CREATE TABLE imagesKiller (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    formats TEXT NOT NULL, 
+                    channels TEXT NOT NULL,
+                    serverID TEXT NOT NULL
+                );
+            `);
+
+            console.log("Actualisation de la table servers");
             
-            let servers = await this.read("./data/backup_servers_latest.json")
+            const servers = await this.read("./data/backup_servers_latest.json")
             if (servers == null) throw "No server default database"
 
             for (const server of servers) {
 
-                const default_whitelist = this.read("./config/whitelist.json");
+                const default_whitelist = await this.read("./config/whitelist.json");
 
                 let values = []
     
                 let threads = server.threads;
                 if (threads == null) threads = []
 
-
-                if (server.whitelist == null) server.whitelist = default_whitelist;
+                let whitelist = server.whitelist
+                if (server.whitelist == null) whitelist = default_whitelist;
     
                 values.push(server.owner);
                 values.push(server.serverID.toString());
                 values.push(server.NSFW ? 1 : 0);
                 values.push(server.language);
                 values.push(JSON.stringify(threads));
-                values.push(JSON.stringify(server.whitelist)); 
+                values.push(JSON.stringify(whitelist)); 
                 values.push(server.linkAssassin ? 1 : 0); // linkAssassin
                 values.push(server.badwords ? 1 : 0); // badWords
+                values.push(server.imageKiller ? 1 : 0); // imageKiller
                 this.insert_new_server(values);
     
             }
             
-              console.log("Création de la table linkassassin");
+            console.log("Actualisation de la table linkassassin");
             
-            const data = await this.read("./data/backup_linkassassin_latest.json")
+            let data = await this.read("./data/backup_linkassassin_latest.json")
             if (data == null) throw "No linkassassin default database"
 
             for (const backup of data) {
@@ -107,6 +120,18 @@ export default class Database {
     
             }
     
+            console.log("Actualisation de la table warns");
+            
+            data = await this.read("./data/backups_warns_latest.json")
+            if (data == null) throw "No warns default database"
+
+            for (const backup of data) {
+                this.set_warn(backup.user, backup.reason, backup.serverID);
+            }
+    
+
+    
+    
 
 
             return true;
@@ -118,20 +143,76 @@ export default class Database {
 
     }
 
-    async insert_new_server(values) {
-
+    get_images_rules(channel, serverID) 
+    {
         try {
-            if (values.length < 8) throw "not enough values";
-    
-            let insert = this.db.prepare(`
-                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist, linkAssassin, Badwords)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-            `);
-        
-            await insert.run(...values)
+            let query = this.sql.prepare(`
+                SELECT formats FROM imagesKiller
+                WHERE channels = ? AND serverID = ? ;
+            `)
+            
+            return query.get(channel, serverID);
+
+        } catch (e) {
+            console.log(`Erreur : ${e} -> tools/Database.js:get_images_rules()`);
+        }
+    }
+    insert_new_images_rules(rules, channel, serverID) 
+    {
+        try {
+            const existing = this.get_images_rules(channel, serverID) != null
+
+            let query = null;
+
+            if (!existing)
+            {
+                query = this.sql.prepare(`
+                    INSERT INTO imagesKiller (formats, channels, serverID) 
+                    VALUES (?, ?, ?) ;
+                `);
+            }
+            else {
+                query = this.sql.prepare(`
+                    UPDATE imagesKiller
+                    SET formats = ?
+                    WHERE channels = ? AND serverID = ? ;
+                `);
+            }
+
+            query.run(rules, channel, serverID);
             
         } catch (e) {
-            console.log(`Erreur : ${e} -> tools/Database.js`);
+            console.log(`Erreur : ${e} -> tools/Database.js:insert_new_images_rules()`);
+        }
+    }
+    remove_images_rule(serverID, channel) 
+    {
+        let query;
+        if (channel == null)
+        {
+            query = this.sql.prepare("DELETE FROM imagesKiller WHERE serverID = ? ;")
+            query.run(serverID);
+            return
+        }
+
+        query = this.sql.prepare("DELETE FROM imagesKiller WHERE channels = ? AND serverID = ? ;")
+        query.run(channel, serverID);
+    }
+
+    insert_new_server(values) {
+
+        try {
+            if (values.length < 9) throw "not enough values";
+    
+            let insert = this.sql.prepare(`
+                INSERT INTO servers (owner, serverID, nsfw, language, threads, whitelist, linkAssassin, Badwords, imagesKiller)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ;
+            `);
+        
+            insert.run(...values)
+            
+        } catch (e) {
+            console.log(`Erreur : ${e} -> tools/Database.js:insert_new_server()`);
         }
 
     }
@@ -139,20 +220,27 @@ export default class Database {
     async update_servers(key, value, serverID) {
 
         try {
+
             const check = DATABASE_CHECK.includes(key);
             if (!check) throw "Not a valid key";
     
-            let update = this.db.prepare(`
-                UPDATE servers
-                SET ${key} = ?
-                WHERE serverID = ?;
-            `)
-            
-            await update.run(value, serverID);
+            const existing = this.get_servers(DB_SERVERS_KEYS.serverID, serverID) != null
+
+            if (existing)
+            {
+                let update = this.sql.prepare(`
+                    UPDATE servers
+                    SET ${key} = ?
+                    WHERE serverID = ?;
+               `)
+                update.run(value, serverID);
+            }
+            else
+                throw "Serveur inexistant"
+           
             
         } catch (e) {
-            console.log(`${e} -> tools/Database.js`);
-            
+            console.log(`${e} -> tools/Database.js:update_server()`);
         }
 
 
@@ -165,12 +253,12 @@ export default class Database {
             const check = DATABASE_CHECK.includes(key)
             if (!check) throw "Not a valid key";
     
-            let getter = this.db.prepare(`SELECT ${key} FROM servers WHERE serverID = ? ;`);
+            let getter = this.sql.prepare(`SELECT ${key} FROM servers WHERE serverID = ? ;`);
     
             return await getter.get(serverID);
             
         } catch (e) {
-            console.log(`${e} -> tools/Database.js`);
+            console.log(`${e} -> tools/Database.js:get_server()`);
             
         }
         
@@ -178,7 +266,7 @@ export default class Database {
     async get_warns(user, serverID) 
     {
         try {
-            let getter = this.db.prepare("SELECT * FROM warns WHERE serverID = ? AND user = ? ;")
+            let getter = this.sql.prepare("SELECT * FROM warns WHERE serverID = ? AND user = ? ;")
 
             return getter.all(serverID, user);
 
@@ -190,7 +278,7 @@ export default class Database {
     async count_warns(user, serverID) 
     {
         try {
-            let counter = this.db.prepare("SELECT COUNT(reason) FROM warns WHERE user = ? AND serverID = ?");
+            let counter = this.sql.prepare("SELECT COUNT(reason) FROM warns WHERE user = ? AND serverID = ?");
 
             return await counter.get(user, serverID)["COUNT(reason)"]; 
             
@@ -203,7 +291,7 @@ export default class Database {
     async set_warn(user, motif, serverID) 
     {
         try {
-            let setter = this.db.prepare(`
+            let setter = this.sql.prepare(`
                 INSERT INTO warns (user, reason, serverID)
                 VALUES (?, ?, ?);
             `);
@@ -218,7 +306,7 @@ export default class Database {
     async clear_warns(user, serverID) 
     {
         try {
-            let query = this.db.prepare(`
+            let query = this.sql.prepare(`
                 DELETE FROM warns
                 WHERE user = ? AND serverID = ?;
             `);
@@ -243,7 +331,7 @@ export default class Database {
     
     async _get_servers_table() {
 
-        let query = this.db.prepare(`
+        let query = this.sql.prepare(`
             SELECT * FROM servers ;
         `);
 
@@ -251,7 +339,7 @@ export default class Database {
     }
 
     async get_chan_linkAssassin(serverID) {
-        let query = this.db.prepare("SELECT channels FROM linkassassin WHERE serverID = ? ;");
+        let query = this.sql.prepare("SELECT channels FROM linkassassin WHERE serverID = ? ;");
         return await query.all(serverID);
     }
 
@@ -260,17 +348,17 @@ export default class Database {
         if (channel == null) 
         {
             // si null alors on prend tout
-            let query = this.db.prepare("SELECT addresses FROM linkassassin WHERE serverID = ? ;")
+            let query = this.sql.prepare("SELECT addresses FROM linkassassin WHERE serverID = ? ;")
             return await query.all(serverID)
         }
-        let query = this.db.prepare(`SELECT addresses FROM linkassassin WHERE serverID = ? AND channels = ? ;`)
+        let query = this.sql.prepare(`SELECT addresses FROM linkassassin WHERE serverID = ? AND channels = ? ;`)
         return await query.get(serverID, channel);
     }
 
     async insert_linkAssassin(serverID, channel, addresses) {
         try {
             
-            let query = this.db.prepare(`
+            let query = this.sql.prepare(`
                 INSERT INTO linkassassin (serverID, channels, addresses)
                 VALUES (?, ?, ?) ;
             `);
@@ -288,12 +376,12 @@ export default class Database {
 
         if (channel == null)
         {
-            let query = this.db.prepare("DELETE FROM linkassassin WHERE serverID = ?");
+            let query = this.sql.prepare("DELETE FROM linkassassin WHERE serverID = ?");
             query.run(serverID);
             return
         }
 
-        let query = this.db.prepare(`
+        let query = this.sql.prepare(`
             DELETE FROM linkassassin WHERE serverID = ? AND channels = ? ;
         `);
 
@@ -301,120 +389,15 @@ export default class Database {
     }
 
     _get_linkassassin_table() {
-        let query = this.db.prepare("SELECT * FROM linkassassin ;");
+        let query = this.sql.prepare("SELECT * FROM linkassassin ;");
         return query.all();
     }
 
     _get_warns_table() {
-        let query = this.db.prepare("SELECT * FROM warns ;")
+        let query = this.sql.prepare("SELECT * FROM warns ;")
         return query.all();
     }
 
-    async _backup() {
-
-            try {
-
-                console.log("Création du fichier de sauvegarde SERVERS");
-
-                const servers = await this._get_servers_table();
-
-                let backup = []
-                for (let srv of servers) {
-
-                    while (typeof srv.threads === "string") 
-                    {
-                        srv.threads = JSON.parse(srv.threads);
-                    }
-
-                    while (typeof srv.whitelist === "string")
-                    {
-                        srv.whitelist = JSON.parse(srv.whitelist);
-                    }
-
-                    backup.push({
-                        serverID: srv.serverID,
-                        owner: srv.owner,
-                        nswf: srv.nswf,
-                        language: srv.language,
-                        threads: JSON.stringify(srv.threads),
-                        whitelist: JSON.stringify(srv.whitelist),
-                        linkAssassin: srv.linkAssassin,
-                        badwords: srv.badwords
-                    });
-                }
-                
-                await this.erase(JSON.stringify(backup), "./data/backup_servers_latest.json");
-                await this.erase(JSON.stringify(backup), "./data/backup_servers_latest.bak");
-
-                console.log("Création du fichier de sauvegarde WARNS");
-
-                const warns = await this._get_warns_table();
-
-                backup = []
-
-                for (const warn of warns) {
-                    
-                    backup.push({
-                        serverID: warn.serverID,
-                        reason: warn.reason,
-                        user: warn.user
-                    });
-                }
-
-                await this.erase(JSON.stringify(backup), "./data/backup_warns_latest.json");
-                await this.erase(JSON.stringify(backup), "./data/backup_warns_latest.bak");
-
-
-                console.log("Création du fichier de sauvegarde LINKASSASSIN");
-
-                const linkAssassin = await this._get_linkassassin_table();
-
-
-                backup = [];
-
-                for (const links of linkAssassin) {
-                    
-                    backup.push({
-                        address: links.addresses,
-                        channels: links.channels,
-                        serverID: links.serverID
-                    });
-                }
-
-                await this.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.json");
-                await this.erase(JSON.stringify(backup), "./data/backup_linkassassin_latest.bak");
-
-        
-            } catch (e) {
-                console.log("Sauvegarde échouée " + e);
-                exit(1);
-            }
-
-           
-
-    }
-
-    _deploy() {
-
-        try {
-
-            // protection anti perte de données
-            if (!fs.existsSync("./data/backup_servers_latest.json")) return
-            if (!fs.existsSync("./data/backup_linkassassin_latest.json")) return
-
-            console.log("Mise à jours de la base de donnée");
-            
-            fs.unlinkSync(this.p) // suppression de la bdd
-            
-            this.db = new DatabaseSync(this.p);
-            
-            this._init(); // on recrée la bdd
-
-            
-        } catch (e) {
-            console.log(`${e} -> tools/Database.js:_deploy()`);
-            
-        }
-
-    }
+    
+   
 }

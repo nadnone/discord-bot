@@ -5,8 +5,7 @@ import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR, DATAB
 
 export default class BadwordsDetector {
 
-    constructor(servers, db) {
-        this.servers = servers;
+    constructor(db) {
         this.allowedbWords = null;
         this.blacklist = null;
         this.db = db

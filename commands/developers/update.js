@@ -3,11 +3,12 @@ import { GITHUB_REPOSITORY, PERMISSIONS } from '../../tools/constants.js';
 import { logout, main } from '../../main.js';
 import { exec } from 'node:child_process';
 import { exit, exitCode } from 'node:process';
+import backup from '../../tools/backup.js';
 
 export default {
     permissions: PERMISSIONS.DEVELOPERS,
 	data: new SlashCommandBuilder().setName('update').setDescription('Mise à jours du bot'),
-	async execute(interaction) {
+	async execute(interaction, db) {
       
         await interaction.reply("Je me met à jours...");
     
@@ -17,6 +18,7 @@ export default {
         await exec(`apk update && apk upgrade && git fetch ${GITHUB_REPOSITORY} && git reset origin/main --hard && rm -rf ./node_modules && npm install`, (error) => {
             if (!error) 
             {
+                backup(db)
                 // on redémarre
                 logout(interaction.client);
                 exit(1); // on simule une erreur pour que docker redémarre le container
