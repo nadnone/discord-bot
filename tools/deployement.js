@@ -11,8 +11,11 @@ export default function update(dirname) {
             const ddb_path = path.join(dirname, "/data/data.db");
 
             // protection anti perte de données
-            if (!fs.existsSync("./data/backup_servers_latest.json")) throw "[!] fichier manquant"
-            if (!fs.existsSync("./data/backup_linkassassin_latest.json")) throw "[!] fichier manquant"
+            if (!argv.includes("--init"))
+            {
+                if (!fs.existsSync("./data/backup_servers_latest.json")) throw "[!] fichier manquant"
+                if (!fs.existsSync("./data/backup_linkassassin_latest.json")) throw "[!] fichier manquant"
+            }
 
             console.log("Mise à jours de la base de donnée");
             
