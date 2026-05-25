@@ -1,0 +1,23 @@
+{
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "bannedReply": "Désolé, mais la sortie est par là. (motif:",
+    "unbanReply": "Je t'accorde la grâce du grand Chat. (motif:",
+    "notSupported": "Non supporté",
+    "missingChannel": "Salon manquant",
+    "missingType": "Type menquant",
+    "finished": "Tâches terminée",
+    "process": "Tâches en cours",
+    "pardonned": "Tu es pardonné (motif:",
+    "purge_1": "Je vais te ping quand j'ai fini, c'est un processus long...",
+    "purge_2": "Membre effacé de tous le serveur.",
+    "purge_3": "Rien à effacer.",
+    "purge_4": "salon traité. (Pas encore fini)",
+    "channelAdded": "Salon ajouté",
+    "channelRemoved": "Salon supprimé",
+    "nothingToDo": "Rien à faire",
+    "warning": "Attention, je t'ai à l'oeil. (motif:",
+    "warnlist_1": "Liste des cartons jaunes",
+    "warnlist_2": "La liste de toutes les bétises qu'a fait la personne demandée",
+    "motif": "Motif"
+}

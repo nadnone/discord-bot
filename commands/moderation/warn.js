@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 import { exec } from 'node:child_process';
 import warnUser from '../../tools/warn.js';
 
@@ -24,10 +24,21 @@ export default {
 		
 		const cible = interaction.options.getUser('cible')
 		const motif = interaction.options.getString('raison');
+		const serverID = interaction.guildId.toString();
+
+		let config = null
+		const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID);
+
+		if (lang.language === "FR")
+			config = await db.read(LANG_FR_CONFIG);
+		else 
+			config = await db.read(LANG_EN_CONFIG);
+
+		
 
 		await warnUser(cible, motif, await interaction, db);
  
-		await interaction.reply(`${cible} Attention, je t'ai à l'oeil. (motif: ${motif})`);
+		await interaction.reply(`${cible} ${config.warning} ${motif})`);
 
 	},
 };

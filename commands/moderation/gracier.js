@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 import banUser from '../../tools/ban.js';
 
 export default {
@@ -18,20 +18,28 @@ export default {
 					.setRequired(true)
 			),
 
-	async execute(interaction) {
+	async execute(interaction, db) {
 
 		try
 		{
 			const cible = interaction.options.getUser('cible')
-			const motif = interaction.options.getString('raison');
-	
-			await interaction.reply(`${cible} Je t'accorde la grâce du grand Chat. (motif: ${motif})`);
+			const motif = interaction.options.getString('raison')
+			const serverID = await interaction.guildId.toString();
+			const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID)
+
+			let config = null;
+			if (lang === "FR")
+				config = await db.read(LANG_FR_CONFIG);
+			else 
+				config = await db.read(LANG_EN_CONFIG);
+
+			await interaction.reply(`${cible} ${config.unbanReply} ${motif})`);
 	
 			await interaction.guild.members.unban(cible, motif);
 		}
 		catch (e) 
 		{
-			console.log(`Erreur: ${e.message} -> gracier.js`);
+			console.log(`Erreur: ${e} -> gracier.js`);
 			
 		}
 	},

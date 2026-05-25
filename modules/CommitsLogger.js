@@ -8,8 +8,8 @@ import { LOGCOMMITSFILE, UPDATES_ROOM_NAME } from "../tools/constants.js";
 export default class CommitsLogger {
 
     checkloop(client) {
-        this._check(client); // on teste une première fois
-        setInterval(this._check, 300_000, client); // on fait la boucle
+        this._check(client); // on teste une fois au démarrage
+        //setInterval(this._check, 300_000, client);
     }
 
     _check(client) {

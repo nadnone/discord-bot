@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 
 export default {
 	permissions: PERMISSIONS.MODERATORS,
@@ -16,11 +16,20 @@ export default {
 				.setRequired(true))
 			,
 
-	async execute(interaction) {
+	async execute(interaction, db) {
+
+		let config = null;
 
 		try {
 
-			await interaction.reply("J'y travaille...");
+			const lang = db.get_servers(DB_SERVERS_KEYS.language, await interaction.guildId.toString());
+
+			if (lang.language === "FR")
+				config = await db.read(LANG_FR_CONFIG);
+			else
+				config = await db.read(LANG_EN_CONFIG);
+
+			await interaction.reply(config.process);
 
 			let max = parseInt(interaction.options.getString("nombre"));
 			const textchannel = await interaction.channel
@@ -56,7 +65,7 @@ export default {
 			console.log(`Erreur : ${e.message} -> nettoyer.js`);
 		}
 		finally {
-			setTimeout(async () => await interaction.followUp("Tâches terminée"), 500);
+			setTimeout(async () => await interaction.followUp(config.finished), 500);
 		}
 		
 		

@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS, WARNJSONFILE } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS, WARNJSONFILE } from '../../tools/constants.js';
 import warnUser from '../../tools/warn.js';
 import pardon from '../../tools/pardon.js';
 import fs from 'node:fs';
@@ -17,7 +17,17 @@ export default {
 	async execute(interaction, db) {
 
         try {
+            const serverID = interaction.guildId.toString();
 
+                let config = null
+                const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID);
+
+                if (lang.language === "FR")
+                    config = await db.read(LANG_FR_CONFIG);
+                else 
+                    config = await db.read(LANG_EN_CONFIG);
+
+		
             const cible = interaction.options.getUser('cible')
     
             let warns = await db.get_warns(cible.id.toString(), await interaction.guildId.toString());
@@ -25,8 +35,8 @@ export default {
 
             let response = new EmbedBuilder()
                             .setColor(0x4D4D47)
-                            .setTitle(`Liste des warns`)
-                            .setDescription("La liste de toutes les bétises qu'a fait la personne demandée")
+                            .setTitle(config.warnlist_1)
+                            .setDescription(config.warnlist_2)
                             .setFields()
                             .setAuthor({name: 'nadnone', url: 'https://nadnone.github.io'})
                             .setTimestamp();
@@ -35,7 +45,7 @@ export default {
                 
                 const warn = warns[i];
 
-                response.addFields({ name: `motif n°${i+1}`, value: warn.reason, inline: false })
+                response.addFields({ name: `${config.motif} n°${i+1}`, value: warn.reason, inline: false })
             }
 
             await interaction.reply({ embeds: [response] });

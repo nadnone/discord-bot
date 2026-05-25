@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 
 export default {
 	permissions: PERMISSIONS.MODERATORS,
@@ -10,11 +10,20 @@ export default {
 				option.setName("cible")
 					.setDescription("Le membre que tu souhaites effacer")
 					.setRequired(true)),
-	async execute(interaction) {
+	async execute(interaction, db) {
+
+		let config = null
+		const lang = db.get_servers(DB_SERVERS_KEYS.language, await interaction.guildId.toString());
+
+		if (lang.language === "FR")
+			config = await db.read(LANG_FR_CONFIG);
+		else 
+			config = await db.read(LANG_EN_CONFIG);
+
 
 		let interval = [];
 		const demandeFrom = await interaction.user;
-		const replymsg =`${demandeFrom}, Je vais te ping quand j'ai fini, c'est un processus long...`
+		const replymsg =`${demandeFrom}, ${config.purge_1}`
 		try {
 
 			await interaction.reply({content: replymsg, flag: MessageFlags.Ephemeral})
@@ -35,7 +44,7 @@ export default {
 				
 				if (interval.length <= 0) 
 				{
-					await interaction.followUp(`${demandeFrom} Membre effacé de tous le serveur.`);
+					await interaction.followUp(`${demandeFrom} ${config.purge_2}`);
 					clearInterval(checker)
 					checker = false;
 					return
@@ -63,14 +72,14 @@ export default {
 
 
 				if (msgs == null) {
-					await interaction.editReply(`${demandeFrom}, Rien à effacer.`)
+					await interaction.editReply(`${demandeFrom}, ${config.purge_3}`)
 					let tmp = interval[i];
 					clearInterval(tmp)
 					interval[i] = false
 					return 
 				}
 				else if (msgs.size <= 0){
-					await interaction.editReply(`${editReply} ${channel[1].name} -> salon traité. (Pas encore fini)`)
+					await interaction.editReply(`${editReply} ${channel[1].name} -> ${config.purge_4}`)
 					let tmp = interval[i];
 					clearInterval(tmp)
 					interval[i] = false

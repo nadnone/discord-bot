@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { DB_SERVERS_KEYS, PERMISSIONS, WHITELISTFILE } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS, WHITELISTFILE } from '../../tools/constants.js';
 
 
 async function check_db(db, serverID) {
@@ -152,11 +152,19 @@ export default {
 
 			await db.update_servers(DB_SERVERS_KEYS.linkAssassin, enabled ? 1 : 0, serverID);
 
+
+			const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID);
+			
+			let config = null;
+			if (lang === "FR")
+				config = await db.read(LANG_FR_CONFIG);
+			else 
+				config = await db.read(LANG_EN_CONFIG);
 			
             if (enabled)
-                await interaction.reply({content: "Activé", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: config.enabled, flag: MessageFlags.Ephemeral});
             else 
-                await interaction.reply({content: "Désactivé", flag: MessageFlags.Ephemeral});
+                await interaction.reply({content: config.disabled, flag: MessageFlags.Ephemeral});
 			
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> cmds/linkAssassin.js`);

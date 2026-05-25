@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { SlashCommandBuilder } from 'discord.js';
-import { PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 import { exec } from 'node:child_process';
 import warnUser from '../../tools/warn.js';
 import pardon from '../../tools/pardon.js';
@@ -22,14 +22,21 @@ export default {
 
 	async execute(interaction, db) {
 
+		let config = null;
         try {
             const cible = interaction.options.getUser('cible')
             const motif = interaction.options.getString('raison');
-    
-            pardon(cible, await interaction.guildId.toString(), db);
-    
-            await interaction.reply(`${cible} Tu es pardonné (motif: ${motif})`);
+			const lang = db.get_servers(DB_SERVERS_KEYS.language, await interaction.guildId.toString());
 
+		
+            pardon(cible, await interaction.guildId.toString(), db);
+    		
+			if (lang.language === "FR")
+				config = await db.read(LANG_FR_CONFIG);
+			else 
+				config = await db.read(LANG_EN_CONFIG);
+				
+			await interaction.reply(`${cible} ${config.pardonned} ${motif})`);
         }
         catch (e) 
         {

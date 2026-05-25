@@ -1,0 +1,23 @@
+{
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "bannedReply": "Sorry, but the exit is there. (reason:",
+    "unbanReply": "I let you the grace of the big cat (motif:",
+    "notSupported": "Not supported",
+    "missingChannel": "Missing channel",
+    "missingType": "Missing type",
+    "finished": "Task finished",
+    "process": "Processing...",
+    "pardonned": "Your are pardonned (reason:",
+    "purge_1": "I'll menton you when I'm finished, this is a long process...",
+    "purge_2": "Member wiped from the whole server.",
+    "purge_3": "Nothing to wipe",
+    "purge_4": "Room processed. (Not yet finished)",
+    "channelAdded": "Channel added",
+    "channelRemoved": "Channel removed",
+    "nothingToDo": "Nothing to do",
+    "warning": "Be careful, I have you in my aim (reason:",
+    "warnlist_1": "Warns list",
+    "warnlist_2": "List of every things the person did wrong",
+    "motif": "Reason"
+}

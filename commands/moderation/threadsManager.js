@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { DB_SERVERS_KEYS, PERMISSIONS, SERVERSLISTFILE } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS, SERVERSLISTFILE } from '../../tools/constants.js';
 import warnUser from '../../tools/warn.js';
 import pardon from '../../tools/pardon.js';
 import fs from 'node:fs';
@@ -23,6 +23,16 @@ export default {
 
             const choice = interaction.options.getBoolean("choix");
             const channel = interaction.options.getChannel("channel");
+            const serverID = interaction.guildId.toString();
+
+            const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID);
+
+            let config = null;
+            if (lang.language === "FR")
+                config = await db.read(LANG_FR_CONFIG);
+            else
+                config = await db.read(LANG_EN_CONFIG);
+
             
             let rawdata = await db.get_servers(DB_SERVERS_KEYS.threads, await interaction.guildId);
 
@@ -41,19 +51,19 @@ export default {
                 threads.push(channel.id);
 
                 await db.update_servers(DB_SERVERS_KEYS.threads, JSON.stringify(threads), await interaction.guildId);
-                await interaction.reply("Channel added");
+                await interaction.reply(config.channelAdded);
                 return
             }
             else if (!choice && alreadyExist)
             {
                 threads = threads.filter(t => t !== channel.id);
                 await db.update_servers(DB_SERVERS_KEYS.threads, JSON.stringify(threads), await interaction.guildId);
-                await interaction.reply("Channel removed");
+                await interaction.reply(config.channelRemoved);
                 return
 
             }
 
-            await interaction.reply("Rien à faire");
+            await interaction.reply(config.nothingToDo);
 
           
         }

@@ -29,14 +29,16 @@ export const SUPPORTED_MIMETYPE = [
 ]
 
 
-export const WARNJSONFILE = "./data/warns.json";
+export const WARNJSONFILE = "./data/warns.json"; // obsolete
 export const DEVELOPERSJSONFILE = "./config/developers.json";
 export const LOGCOMMITSFILE = "./data/commits.json";
 export const BLACKLISTFILE = "./config/blacklist.json"
-export const BLACKLISTSFWFILE = "./config/blacklist_SFW.json"
-export const WHITELISTFILE = "./config/whitelist.json"
+export const BLACKLISTSFWFILE = "./config/blacklist_SFW.json" 
+export const WHITELISTFILE = "./config/whitelist.json" // encore utilisé
 export const ALLOWERBARDWORDSFILE = "./config/allowedBadWords.json"
-export const SERVERSLISTFILE = "./data/servers.json"
+export const SERVERSLISTFILE = "./data/servers.json" // obsolete
+export const LANG_FR_CONFIG = "./config/lang_fr.json"
+export const LANG_EN_CONFIG = "./config/lang_en.json"
 
 export const UPDATES_ROOM_NAME = "lechatfouettard-updates"
 
