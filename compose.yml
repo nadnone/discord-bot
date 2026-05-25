@@ -8,5 +8,6 @@ services:
     restart: unless-stopped
     network_mode: host
     volumes:
-       - $DISK/discord-bot/:/app/discord-bot/config/:Z
-       - $DISK/discord-bot/data/:/app/discord-bot/data/:Z
+      - $DISK/discord-bot/config/:/app/discord-bot/config/:Z
+      - $DISK/discord-bot/data/:/app/discord-bot/data/:Z
+      - $DISK/discord-bot/backups/:/app/discord-bot/backups/:Z

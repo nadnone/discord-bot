@@ -6,20 +6,21 @@ import SlashCmdManager from './events/SlashCmdManager.js';
 import CommandsLoader from './modules/CommandsLoader.js';
 import BotReady from './events/BotReady.js';
 import path from 'node:path';
-import fs, { mkdirSync } from 'node:fs';
+import fs, { existsSync, mkdirSync } from 'node:fs';
 import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
 import Database from './tools/Database.js';
 import backup from './tools/backup.js';
 import update from './tools/deployement.js';
-import { argv } from 'node:process';
+import { argv, exit } from 'node:process';
+import { DatabaseSync } from 'node:sqlite';
 
 
 
-export async function main(argv) {
-    
-    await load_folders() // verification des dossiers manquants
-    await load_files(); // verification de fichiers manquants
+export function main(argument) {    
+
+    load_folders() // verification des dossiers manquants
+    load_files(); // verification de fichiers manquants
 
 
     const client = new Client({ 
@@ -42,10 +43,24 @@ export async function main(argv) {
     const dirname = import.meta.dirname;
     new BotReady(client)
     
-    let db = new Database(dirname);
 
-    if (argv.includes("--update")) // seulement avec l'argument --update
-        await update(dirname, db); // pour les mises à niveau de la base de donnée
+    let db = null;
+        
+    try {
+    
+        if (argument != null)
+            argv.push(argument)
+        
+
+    if (argv.includes("--update") || argv.includes("--init")) // seulement avec l'argument --update
+        update(dirname) // pour les mises à niveau de la base de donnée
+        db = new Database(dirname) // on ouvre la base de donnée
+
+    } catch (e) {
+        console.log(e);
+        return
+    }
+
 
 
     const presence = new ActivityPresence(client);
@@ -65,6 +80,7 @@ export async function main(argv) {
 
 export function logout(client) {
     client.destroy();
+    exit(0)
 }
 
 
@@ -122,5 +138,5 @@ async function load_folders() {
 }
 
 
-main(argv);
+main();
 

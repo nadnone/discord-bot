@@ -5,154 +5,24 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { exec } from "node:child_process";
 import backup from "./backup.js";
+import { argv } from "node:process";
 
 export default class Database {
 
     constructor(dirname) {
         this.p = path.join(dirname, "/data/data.db")
-
-
-        if (!fs.existsSync(this.p))
-        {
-            this.sql = new DatabaseSync(this.p);
-            this._init();
-            return
-        }
-
-        this.sql = new DatabaseSync(this.p);
-
-    }
-
-    async _init() {
-
+        this.sql = null;
+        
         try {
-            
-            console.log("Initialisation de la base de donnée");
-            
-            this.sql.exec(`
-                CREATE TABLE servers (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    owner TEXT NOT NULL, 
-                    serverID TEXT NOT NULL, 
-                    nsfw BOOLEAN NOT NULL,
-                    language TEXT NOT NULL, 
-                    threads TEXT,
-                    whitelist TEXT,
-                    linkAssassin BOOLEAN NOT NULL,
-                    badwords BOOLEAN NOT NULL,
-                    imagesKiller BOOLEAN NOT NULL
-                );
-                `);
-
-            this.sql.exec(`
-                CREATE TABLE warns (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user TEXT NOT NULL, 
-                    reason TEXT NOT NULL,
-                    serverID TEXT NOT NULL
-                );
-            `);
-    
-             this.sql.exec(`
-                CREATE TABLE linkassassin (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    addresses TEXT NOT NULL, 
-                    channels TEXT NOT NULL,
-                    serverID TEXT NOT NULL
-                );
-            `);
-
-            this.sql.exec(`
-                CREATE TABLE imagesKiller (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    formats TEXT NOT NULL, 
-                    channels TEXT NOT NULL,
-                    serverID TEXT NOT NULL
-                );
-            `);
-
-            console.log("Actualisation de la table servers");
-            
-            const servers = await this.read("./data/backup_servers_latest.json")
-            if (servers == null) throw "No server default database"
-
-            for (const server of servers) {
-
-                const default_whitelist = await this.read("./config/whitelist.json");
-
-                let values = []
-    
-                let threads = server.threads;
-                if (threads == null) threads = []
-
-                let whitelist = server.whitelist
-                if (server.whitelist == null) whitelist = default_whitelist;
-    
-                values.push(server.owner);
-                values.push(server.serverID.toString());
-                values.push(server.NSFW ? 1 : 0);
-                values.push(server.language);
-                values.push(JSON.stringify(threads));
-                values.push(JSON.stringify(whitelist)); 
-                values.push(server.linkAssassin ? 1 : 0); // linkAssassin
-                values.push(server.badwords ? 1 : 0); // badWords
-                values.push(server.imageKiller ? 1 : 0); // imageKiller
-                this.insert_new_server(values);
-    
-            }
-            
-            console.log("Actualisation de la table linkassassin");
-            
-            let data = await this.read("./data/backup_linkassassin_latest.json")
-            if (data == null) throw "No linkassassin default database"
-
-            for (const backup of data) {
-
-                let check = JSON.parse(backup.address);
-                
-                if (check.length === 0) 
-                {
-                    check.push("FILTER");
-                }
-                check = JSON.stringify(check);
-
-                this.insert_linkAssassin(backup.serverID, backup.channels, check);
-    
-            }
-    
-            console.log("Actualisation de la table warns");
-            
-            data = await this.read("./data/backup_warns_latest.json")
-            if (data == null) throw "No warns default database"
-
-            for (const backup of data) {
-                this.set_warn(backup.user, backup.reason, backup.serverID);
-            }
-    
-
-            console.log("Actualisation de la table imageKiller");
-            
-            data = await this.read("./data/backup_imageskiller_latest.json")
-            if (data == null) throw "No warns default database"
-
-            for (const backup of data) {
-                this.insert_new_images_rules(backup.formats, backup.channels, backup.serverID);
-            }
-    
-
-            return true;
-
+            this.sql = new DatabaseSync(this.p);
         } catch (e) {
-            console.log(`${e} -> tools/Database.js:_init()`);
-            
+            throw `${e} -> tools/Database.js:contrusctor()`
         }
 
     }
 
-    _get_imageskiller_table()
-    {
-        let query = this.sql.prepare("SELECT * FROM imagesKiller;")
-        return query.all();
+    exec_table(instructions) {
+        this.sql.exec(instructions);
     }
 
     get_images_rules(channel, serverID) 
@@ -229,7 +99,7 @@ export default class Database {
 
     }
 
-    async update_servers(key, value, serverID) {
+    update_servers(key, value, serverID) {
 
         try {
 
@@ -258,7 +128,7 @@ export default class Database {
 
     }
 
-    async get_servers(key, serverID) {
+    get_servers(key, serverID) {
         
         try {
             
@@ -267,7 +137,7 @@ export default class Database {
     
             let getter = this.sql.prepare(`SELECT ${key} FROM servers WHERE serverID = ? ;`);
     
-            return await getter.get(serverID);
+            return getter.get(serverID);
             
         } catch (e) {
             console.log(`${e} -> tools/Database.js:get_server()`);
@@ -275,11 +145,10 @@ export default class Database {
         }
         
     }
-    async get_warns(user, serverID) 
+    get_warns(user, serverID) 
     {
         try {
             let getter = this.sql.prepare("SELECT * FROM warns WHERE serverID = ? AND user = ? ;")
-
             return getter.all(serverID, user);
 
         } catch (e) {
@@ -287,12 +156,12 @@ export default class Database {
         }
     }
 
-    async count_warns(user, serverID) 
+    count_warns(user, serverID) 
     {
         try {
             let counter = this.sql.prepare("SELECT COUNT(reason) FROM warns WHERE user = ? AND serverID = ?");
 
-            return await counter.get(user, serverID)["COUNT(reason)"]; 
+            return counter.get(user, serverID)["COUNT(reason)"]; 
             
         } catch (e) {
             console.log(`${e} -> tools/Database.js:count_warns()`);
@@ -300,7 +169,7 @@ export default class Database {
         }
     }
 
-    async set_warn(user, motif, serverID) 
+    set_warn(user, motif, serverID) 
     {
         try {
             let setter = this.sql.prepare(`
@@ -308,14 +177,14 @@ export default class Database {
                 VALUES (?, ?, ?);
             `);
         
-            await setter.run(user.toString(), motif, serverID.toString());
+            setter.run(user.toString(), motif, serverID.toString());
 
         } catch (e) {
             console.log(`${e} -> tools/Database.js:set_warn()`);
         }
     }
 
-    async clear_warns(user, serverID) 
+    clear_warns(user, serverID) 
     {
         try {
             let query = this.sql.prepare(`
@@ -323,7 +192,7 @@ export default class Database {
                 WHERE user = ? AND serverID = ?;
             `);
 
-            await query.run(user.toString(), serverID.toString());
+            query.run(user.toString(), serverID.toString());
 
         } catch (e) {
             console.log(`${e} -> tools/Database.js:clear_warns()`);
@@ -332,42 +201,52 @@ export default class Database {
     }
 
     async erase(data, context) {
-
         await fs.writeFileSync(context, data);
     }
 
     read(context) {
-        
         return JSON.parse(fs.readFileSync(context));
     }
-    
-    async _get_servers_table() {
-
-        let query = this.sql.prepare(`
-            SELECT * FROM servers ;
-        `);
-
+$
+    _get_imageskiller_table()
+    {
+        let query = this.sql.prepare("SELECT * FROM imagesKiller;")
         return query.all();
     }
 
-    async get_chan_linkAssassin(serverID) {
-        let query = this.sql.prepare("SELECT channels FROM linkassassin WHERE serverID = ? ;");
-        return await query.all(serverID);
+    _get_servers_table() {
+
+        let query = this.sql.prepare(`SELECT * FROM servers ;`);
+        return query.all();
+    }
+    _get_linkassassin_table() {
+        let query = this.sql.prepare("SELECT * FROM linkassassin ;");
+        return query.all();
     }
 
-    async get_linkAssassin(serverID, channel){
+    _get_warns_table() {
+        let query = this.sql.prepare("SELECT * FROM warns ;")
+        return query.all();
+    }
+
+    get_chan_linkAssassin(serverID) {
+        let query = this.sql.prepare("SELECT channels FROM linkassassin WHERE serverID = ? ;");
+        return query.all(serverID);
+    }
+
+    get_linkAssassin(serverID, channel){
 
         if (channel == null) 
         {
             // si null alors on prend tout
             let query = this.sql.prepare("SELECT addresses FROM linkassassin WHERE serverID = ? ;")
-            return await query.all(serverID)
+            return query.all(serverID)
         }
         let query = this.sql.prepare(`SELECT addresses FROM linkassassin WHERE serverID = ? AND channels = ? ;`)
-        return await query.get(serverID, channel);
+        return query.get(serverID, channel);
     }
 
-    async insert_linkAssassin(serverID, channel, addresses) {
+    insert_linkAssassin(serverID, channel, addresses) {
         try {
             
             let query = this.sql.prepare(`
@@ -375,7 +254,7 @@ export default class Database {
                 VALUES (?, ?, ?) ;
             `);
     
-            await query.run(serverID, channel, addresses);
+            query.run(serverID, channel, addresses);
 
         } catch (e) {
             console.log(`${e} -> tools/Database.js:insert_linkAssassin()`);
@@ -400,15 +279,6 @@ export default class Database {
         query.run(serverID, channel)
     }
 
-    _get_linkassassin_table() {
-        let query = this.sql.prepare("SELECT * FROM linkassassin ;");
-        return query.all();
-    }
-
-    _get_warns_table() {
-        let query = this.sql.prepare("SELECT * FROM warns ;")
-        return query.all();
-    }
 
     
    

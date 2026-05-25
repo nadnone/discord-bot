@@ -18,10 +18,10 @@ export default {
         await exec(`apk update && apk upgrade && git fetch ${GITHUB_REPOSITORY} && git reset origin/main --hard && rm -rf ./node_modules && npm install`, (error) => {
             if (!error) 
             {
-                backup(db)
+                backup(db) // on backup avant
                 // on redémarre
                 logout(interaction.client);
-                exit(1); // on simule une erreur pour que docker redémarre le container
+                main("--update")
             }
             else if (error.code === 128)
             {
