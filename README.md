@@ -11,11 +11,12 @@ Des commandes pour les opérateurs (developeurs) sont aussi disponibles pour red
 
 ### - [Partially support English](./README_EN.md)
 
-### Le bot est en utilisation privée sous les serveurs donnés :
+### Le bot est en utilisation sous les serveurs donnés :
 -----------
 
-- [Lien d'invitation Discord]( https://discord.gg/2gRurtqTsj )
-- (Un autre serveur privé sans lien)
+1. - [Lien d'invitation Discord]( https://discord.gg/2gRurtqTsj )
+2. - (Un autre serveur privé sans lien)
+3. - Mon serveur
 
 ### Remerciements
 -----------

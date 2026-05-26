@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder, UnfurledMediaItemLoadingState } from 'discord.js';
 import { PERMISSIONS } from '../../tools/constants.js';
 import { logout, main } from '../../main.js';
 import { exec } from 'node:child_process';
@@ -27,8 +27,21 @@ export default {
                 return
             }      
         });
+        await interaction.reply("Backup terminée, nettoyage des anciennes backups.. :saluting_face:")
 
+        const oldbackups = fs.readdirSync("./backups");
+        const one_day = Date.now() - (timestamp - 24*3600);
 
-        await interaction.reply("Backup terminée :saluting_face:")
+        for (const backup of oldbackups) {
+            
+            let time = parseInt(backup.replace("backup_", "").replace(".zip", ""));
+
+            if (parseInt(time) < (timestamp - one_day * 15)) // on garde les backups 15 jours
+                fs.unlinkSync(`./backups/${backup}`);
+        }
+
+        const curr_backups = fs.readdirSync("./backups")
+
+        await interaction.followUp(`Nettoyage terminé, reste ${curr_backups.length} backup(s) :saluting_face:`)
     },
 };

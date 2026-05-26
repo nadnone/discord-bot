@@ -15,8 +15,9 @@ The commands for the operators (developpers) are also availables for reboot, upd
 ### The bot is under private use on the bellow servers:
 -----------
 
-- [Discord link]( https://discord.gg/2gRurtqTsj)
-- (Another private server without link)
+1. - [Discord link]( https://discord.gg/2gRurtqTsj)
+2. - (Another private server without link)
+3. - My server
 
 ### Credits
 -----------
