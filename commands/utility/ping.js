@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { DB_SERVERS_KEYS, PERMISSIONS } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 
 export default {
 	permissions: PERMISSIONS.USERS,
@@ -11,11 +11,13 @@ export default {
 			const lang = db.get_servers(DB_SERVERS_KEYS.language, await interaction.guildId.toString());
 			if (lang == null) return
 
-
+			let config = null;
 			if (lang.language === "FR")
-				await interaction.reply('JE SUIS VIVANT (v1.0)!');
+				config = await db.read(LANG_FR_CONFIG)
 			else
-				await interaction.reply("I'm alive ! (v1.0)")
+				config = await db.read(LANG_EN_CONFIG)
+
+			await interaction.reply(config.ping)
 			
 		} catch (e) {
 			console.log(`Erreur : ${e.message} -> ping.js`);

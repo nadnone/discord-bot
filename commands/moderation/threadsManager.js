@@ -7,7 +7,7 @@ import fs from 'node:fs';
 export default {
 	permissions: PERMISSIONS.MODERATORS,
 	data: new SlashCommandBuilder().setName('threadsmanager')
-			.setDescription("Ajouter un supprimer un salon à fils")
+			.setDescription("Ajouter un supprimer un salon à fil")
 			.addChannelOption(option =>
 				option.setName("channel")
                 .setDescription("Le salon que tu souhaites ajouter ou supprimer")

@@ -22,5 +22,9 @@
     "motif": "Reason",
     "thread_title": "Object's discussion",
     "linkassasssin_detected": "Not allowed link detected, if you think I'm wrong, please report it to the moderation.",
-    "linkassassin_report": "Send not allowed link:"
+    "linkassassin_report": "Send not allowed link:",
+    "ping": "I'm alive ! (v1.0)",
+    "info_first_message": "Thus, like this you want to spy on me ? O_O",
+    "info_embed_title": "Voir le projet sur GitHub",
+    "info_embed_desc": "Je suis un bot fait en Javascript par un utilisateur random de Discord."
 }

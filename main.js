@@ -86,22 +86,22 @@ export function logout(client) {
 }
 
 
-async function load_files() {
+function load_files() {
 
     try {
 
         let data = [];
 
-        data.push({name: BLACKLISTFILE, status: await fs.existsSync(BLACKLISTFILE)});
-        data.push({name: WHITELISTFILE, status: await fs.existsSync(WHITELISTFILE)});
-        data.push({name: LOGCOMMITSFILE, status: await fs.existsSync(LOGCOMMITSFILE)});
-        data.push({name: BLACKLISTSFWFILE, status: await fs.existsSync(BLACKLISTSFWFILE)});
-        data.push({name: ALLOWERBARDWORDSFILE, status: await fs.existsSync(ALLOWERBARDWORDSFILE)});
+        data.push({name: BLACKLISTFILE, status: fs.existsSync(BLACKLISTFILE)});
+        data.push({name: WHITELISTFILE, status: fs.existsSync(WHITELISTFILE)});
+        data.push({name: LOGCOMMITSFILE, status: fs.existsSync(LOGCOMMITSFILE)});
+        data.push({name: BLACKLISTSFWFILE, status: fs.existsSync(BLACKLISTSFWFILE)});
+        data.push({name: ALLOWERBARDWORDSFILE, status: fs.existsSync(ALLOWERBARDWORDSFILE)});
 
         for (const file of data) {
             if (!file.status) {
                 console.log(`Création de ${file.name}`);
-                await fs.writeFileSync(file.name, "[]")
+                fs.writeFileSync(file.name, "[]")
             }
         }
 
@@ -111,21 +111,21 @@ async function load_files() {
     }
 }
 
-async function load_folders() {
+function load_folders() {
     
     try {
         
         let data = [];
     
-        data.push({name: "./data", status: await fs.existsSync("./data")});
-        data.push({name: "./config", status: await fs.existsSync("./config")});
+        data.push({name: "./data", status: fs.existsSync("./data")});
+        data.push({name: "./config", status: fs.existsSync("./config")});
     
         for (const folder of data) {
 
             if (!folder.status) {
 
                 console.log(`Création de ${folder.name}`);
-                await mkdirSync(folder.name);
+                mkdirSync(folder.name);
             }
         }
 

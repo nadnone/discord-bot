@@ -14,9 +14,9 @@ Des commandes pour les opérateurs (developeurs) sont aussi disponibles pour red
 ### Le bot est en utilisation sous les serveurs donnés :
 -----------
 
-1. - [Lien d'invitation Discord]( https://discord.gg/2gRurtqTsj )
+1. - [Le Cocooon Félin]( https://discord.gg/2gRurtqTsj )
 2. - (Un autre serveur privé sans lien)
-3. - Mon serveur
+3. - [Mon serveur](https://discord.com/invite/KYVycbQRQ7)
 
 ### Remerciements
 -----------

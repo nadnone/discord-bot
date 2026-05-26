@@ -22,5 +22,10 @@
     "motif": "Motif",
     "thread_title": "Discussion sur l'objet",
     "linkassasssin_detected": "Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande d'avertir la modération.",
-    "linkassassin_report": "Envoie des liens non authorisés :"
+    "linkassassin_report": "Envoie des liens non authorisés :",
+    "ping": "Je suis vivant ! (v1.0)",
+    "info_first_message": "Alors comme ca tu veux me stalk ? O_O",
+    "info_embed_title": "To look my project on GitHub",
+    "info_embed_desc": "I'm a bot made with Javascript by a random Discord user."
+
 }
