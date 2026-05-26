@@ -3,7 +3,7 @@ import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 
 export default {
-	permissions: PERMISSIONS.MODERATORS,
+	permissions: PERMISSIONS.SUPER_MODERATOR,
 	data: new SlashCommandBuilder().setName('purge')
 			.setDescription("(Attention !) Supprimer TOUS les messages d'un membre (dans TOUS le serveur)")
 			.addUserOption((option) =>

@@ -1,6 +1,7 @@
 export const PERMISSIONS = {
     USERS: "users",
     MODERATORS: "moderators",
+    SUPER_MODERATOR: "super_moderators",
     DEVELOPERS: "developers"
 }
 export const DB_SERVERS_KEYS = {

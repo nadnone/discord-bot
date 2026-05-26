@@ -52,8 +52,10 @@ export function main(argument) {
             argv.push(argument)
         
 
-    if (argv.includes("--update") || argv.includes("--init")) // seulement avec l'argument --update
-        update(dirname) // pour les mises à niveau de la base de donnée
+        if (argv.includes("--update") || argv.includes("--init")) // seulement avec l'argument --update ou --init
+        {
+            update(dirname) // pour les mises à niveau de la base de donnée
+        }
         db = new Database(dirname) // on ouvre la base de donnée
 
     } catch (e) {

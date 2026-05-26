@@ -31,7 +31,7 @@ export default class CommitsLogger {
                 const title = commit[4].trim()
 
 
-                const lastcommit = commitsData.filter(el => el.title === title && el.fields === fields && el.author === author)
+                const lastcommit = commitsData.filter(el => el.title === title && el.fields === fields.join("\n").trim() && el.author === author)
                 
                 if (lastcommit.length > 0) 
                 {
@@ -61,7 +61,7 @@ export default class CommitsLogger {
                 let newcommmit = [] // on efface pour n'avoir qu'un seul element : TODO à revoir
                 newcommmit.push({
                     title: title,
-                    fields: fields,
+                    fields: fields.join("\n").trim(),
                     author: author
                 });
 

@@ -23,9 +23,16 @@ export default class SlashCmdManager {
             return true;
     }
 
+    _isSuperModerator(interaction) {
+        if (interaction.memberPermissions.has("BanMembers"))
+            return true; // si l'auteur est membre des gens qui peuvent bannirs
+        else 
+            return false;
+    }
+
     async _isModerator(interaction) {
 
-        if (interaction.memberPermissions.has("BanMembers"))
+        if (interaction.memberPermissions.has("KickMembers"))
             return true; // si l'auteur est membre des gens qui peuvent bannirs
         else 
             return false;
@@ -52,6 +59,14 @@ export default class SlashCmdManager {
                     cmd.permissions === PERMISSIONS.MODERATORS && await this._isModerator(interaction))
                 {
                     activityPresence.set('Entrain de servir...', ActivityType.Playing);
+                    await cmd.execute(interaction, this.db);
+                    return
+                }
+                else if (interaction.commandName === cmd.data.toJSON().name &&
+                    cmd.permissions === PERMISSIONS.SUPER_MODERATOR && await this._isSuperModerator(interaction)
+                )
+                {
+                    activityPresence.set('Entrain de super-servir !', ActivityType.Playing);
                     await cmd.execute(interaction, this.db);
                     return
                 }

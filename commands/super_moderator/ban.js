@@ -4,7 +4,7 @@ import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '..
 import banUser from '../../tools/ban.js';
 
 export default {
-	permissions: PERMISSIONS.MODERATORS,
+	permissions: PERMISSIONS.SUPER_MODERATOR,
 	data: new SlashCommandBuilder().setName('ban')
 			.setDescription("Bannir un membre (experimental)")
 			.addUserOption(option =>

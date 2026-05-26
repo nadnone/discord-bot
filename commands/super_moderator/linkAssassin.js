@@ -28,7 +28,7 @@ async function whitelist_check(whitelist, interaction) {
 }
 
 export default {
-	permissions: PERMISSIONS.MODERATORS,
+	permissions: PERMISSIONS.SUPER_MODERATOR,
 	data: new SlashCommandBuilder().setName('linkassassin')
 			.setDescription("Gérer les liens sur ton serveur")
 			.addBooleanOption((option) =>
