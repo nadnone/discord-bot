@@ -35,8 +35,17 @@ export default {
 			else
 				config = await db.read(LANG_EN_CONFIG);
 
-			if (type == null)
+ 			if (!enabled) 
+			{
+				await db.remove_images_rule(serverID);
+                await interaction.reply({content: config.disabled, flag: MessageFlags.Ephemeral});
+				return
+			}
+			else if (type == null)
+			{
 				interaction.reply(config.missingType)
+				return
+			}	
 
 			let mimetype = type.replaceAll(" ", "").trim().split(",");
 
@@ -55,13 +64,7 @@ export default {
 				await interaction.reply(config.missingChannel);
 				return
 			}
-			else if (!enabled) 
-			{
-				await db.remove_images_rule(serverID);
-                await interaction.reply({content: config.disabled, flag: MessageFlags.Ephemeral});
-				return
-			}
-8
+
 			mimetype = JSON.stringify(mimetype);
 
 			db.insert_new_images_rules(mimetype, channel.id.toString(), serverID);

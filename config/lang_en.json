@@ -19,5 +19,8 @@
     "warning": "Be careful, I have you in my aim (reason:",
     "warnlist_1": "Warns list",
     "warnlist_2": "List of every things the person did wrong",
-    "motif": "Reason"
+    "motif": "Reason",
+    "thread_title": "Object's discussion",
+    "linkassasssin_detected": "Not allowed link detected, if you think I'm wrong, please report it to the moderation.",
+    "linkassassin_report": "Send not allowed link:"
 }

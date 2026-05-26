@@ -30,7 +30,7 @@ export default {
         await interaction.reply("Backup terminée, nettoyage des anciennes backups.. :saluting_face:")
 
         const oldbackups = fs.readdirSync("./backups");
-        const one_day = Date.now() - (timestamp - 24*3600);
+        const one_day = Date.now() - (timestamp - 24*60*60*100);
 
         for (const backup of oldbackups) {
             

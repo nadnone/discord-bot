@@ -41,7 +41,7 @@ export default {
 					cache: false 
 				})
 				
-				msgs = await msgs.filter(m => m.author.id === interaction.options.getUser("cible").id);
+				msgs = await msgs.filter(m => m.author.id === interaction.options.getUser("cible").id && m.content !== config.process);
 				
 				if (msgs.size <= 0 || msgs == null) clearInterval(interval);
 
@@ -65,7 +65,7 @@ export default {
 			console.log(`Erreur : ${e.message} -> nettoyer.js`);
 		}
 		finally {
-			setTimeout(async () => await interaction.followUp(config.finished), 500);
+			setTimeout(async () => await interaction.followUp(`${await interaction.member}, ${config.finished}`), 500);
 		}
 		
 		

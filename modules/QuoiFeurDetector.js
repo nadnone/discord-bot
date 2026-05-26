@@ -5,7 +5,7 @@ export default class QuoiFeurDetector {
 
     constructor(db) {
         this.db = db
-        this.cooldown = 15; // toutes les 15 fois
+        this.cooldown = 30; // toutes les 30 fois
     }
 
     check(interaction, presence) {

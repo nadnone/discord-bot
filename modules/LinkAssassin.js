@@ -1,7 +1,7 @@
 import { ActivityType, MessageFlags } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, LOGCOMMITSFILE, WHITELISTFILE } from "../tools/constants.js";
+import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, LOGCOMMITSFILE, WHITELISTFILE } from "../tools/constants.js";
 
 export default class LinkAssassin {
 
@@ -156,7 +156,20 @@ export default class LinkAssassin {
         {
             this.blacklist = this.blacklist_nsfw.concat(this.blacklist_sfw);
         }
+        else
+        {
+            this.blacklist = this.blacklist_nsfw;
+        }
 
+
+        let config = null;
+        if (lang.language === "FR")
+            config = await this.db.read(LANG_FR_CONFIG)
+        else
+            config = await this.db.read(LANG_EN_CONFIG);
+
+
+        
         for (const el of this.blacklist)
         {
 
@@ -169,18 +182,10 @@ export default class LinkAssassin {
                             .trim()
             
               
-                if (rslt.includes(nude_link) && lang.language === "FR") {
-                    await interaction.reply({ content: "Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande de faire un ticket.",flag: MessageFlags.Ephemeral});
-                    await warnUser(interaction.member, `Envoie des liens douteux: ${nude_link}`, interaction, this.db);
-                    await interaction.delete();
-                    return true
-                }
-                else if (rslt.includes(nude_link) && lang.language === "EN") {
-                    await interaction.reply({content: "Not allowed link detected, if you think I'm wrong, please send a ticket.", flag: MessageFlags.Ephemeral});
-                    await warnUser(interaction.member, `Send not allowed link: ${nude_link}`, interactio, this.db);
-                    await interaction.delete();
-                    return true
-                }
+                await interaction.reply({content: config.linkassasssin_detected, flag: MessageFlags.Ephemeral});
+                await warnUser(interaction.member, `${config.linkassassin_report} ${nude_link}`, interaction, this.db);
+                await interaction.delete();
+                return true
         }
 
 

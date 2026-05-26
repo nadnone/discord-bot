@@ -27,20 +27,27 @@ export default class CommitsLogger {
 
                 const author = commit[1].replace("Author: ", "").split(" ")[0].trim();
                 const date = new Date(commit[2].replace("Date: ", ""));
-                const description = commit.slice(5).join("\n").trim();
+                const fields = commit.splice(5);
                 const title = commit[4].trim()
 
-                const lastcommit = commitsData.filter(el => el.title === title && el.description === description && el.author === author)
+
+                const lastcommit = commitsData.filter(el => el.title === title && el.fields === fields && el.author === author)
+                
                 if (lastcommit.length > 0) 
                 {
                     this.check_anyway = false;
                     return
                 }
 
-                const embed = new EmbedBuilder()
+                let embed = new EmbedBuilder()
                             .setAuthor({name: author})
-                            .setDescription(description)
                             .setTitle(title)
+
+                for (let i = 0; i < fields.length; i++) {
+
+                    embed.addFields({name: "", value: fields[i].trim()});
+
+                }
 
 
                 const channels = await client.channels.cache.forEach(async (chan) => {
@@ -54,7 +61,7 @@ export default class CommitsLogger {
                 let newcommmit = [] // on efface pour n'avoir qu'un seul element : TODO à revoir
                 newcommmit.push({
                     title: title,
-                    description: description,
+                    fields: fields,
                     author: author
                 });
 

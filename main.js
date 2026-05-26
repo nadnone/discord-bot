@@ -7,7 +7,7 @@ import CommandsLoader from './modules/CommandsLoader.js';
 import BotReady from './events/BotReady.js';
 import path from 'node:path';
 import fs, { existsSync, mkdirSync } from 'node:fs';
-import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from './tools/constants.js';
+import { ALLOWERBARDWORDSFILE, BLACKLISTFILE, BLACKLISTSFWFILE, LOGCOMMITSFILE, WHITELISTFILE } from './tools/constants.js';
 import { exec } from 'node:child_process';
 import Database from './tools/Database.js';
 import backup from './tools/backup.js';
@@ -94,7 +94,6 @@ async function load_files() {
         data.push({name: WHITELISTFILE, status: await fs.existsSync(WHITELISTFILE)});
         data.push({name: LOGCOMMITSFILE, status: await fs.existsSync(LOGCOMMITSFILE)});
         data.push({name: BLACKLISTSFWFILE, status: await fs.existsSync(BLACKLISTSFWFILE)});
-        data.push({name: SERVERSLISTFILE, status: await fs.existsSync(SERVERSLISTFILE)});
         data.push({name: ALLOWERBARDWORDSFILE, status: await fs.existsSync(ALLOWERBARDWORDSFILE)});
 
         for (const file of data) {

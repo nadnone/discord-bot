@@ -1,5 +1,5 @@
 import { dir, log } from "node:console";
-import { DATABASE_CHECK, DB_SERVERS_KEYS, SERVERSLISTFILE, WARNJSONFILE, WHITELISTFILE } from "./constants.js";
+import { DATABASE_CHECK, DB_SERVERS_KEYS, WHITELISTFILE } from "./constants.js";
 import fs from 'node:fs';
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";

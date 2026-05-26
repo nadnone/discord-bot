@@ -1,6 +1,6 @@
 import { ChannelType } from 'discord-api-types/v9';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS, WARNJSONFILE } from '../../tools/constants.js';
+import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS } from '../../tools/constants.js';
 import warnUser from '../../tools/warn.js';
 import pardon from '../../tools/pardon.js';
 import fs from 'node:fs';
@@ -37,7 +37,6 @@ export default {
                             .setColor(0x4D4D47)
                             .setTitle(config.warnlist_1)
                             .setDescription(config.warnlist_2)
-                            .setFields()
                             .setAuthor({name: 'nadnone', url: 'https://nadnone.github.io'})
                             .setTimestamp();
     

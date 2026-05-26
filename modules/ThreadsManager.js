@@ -1,5 +1,5 @@
 import { ThreadAutoArchiveDuration } from 'discord.js';
-import {  DB_SERVERS_KEYS, SERVERSLISTFILE } from '../tools/constants.js'
+import {  DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG } from '../tools/constants.js'
 
 export default class ThreadsManager {
 
@@ -17,7 +17,7 @@ export default class ThreadsManager {
 
         const threads = raw_threads.threads
 
-        
+        // si pas inclu dans la liste, alors on passe
         if (!threads.includes(await interaction.channel.id)) return
 
         // on récupère le dernier message pour controle
@@ -30,27 +30,19 @@ export default class ThreadsManager {
         // si ce n'est pas une fichier ou un lien
         if (lastmessage.attachments.size <= 0 && !lastmessage.content.toString().match("https|http|ftp|ftps")) return
 
-        if (lang.language === "FR") {
 
-            await interaction.channel.threads.create({
-                name: "Discussion sur l'objet",
-                autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
-                reason: "Object's thread",
-            });
+        let config = null
+        if (lang.language === "FR")
+            config = await this.db.read(LANG_FR_CONFIG)
+        else
+            config = await this.db.read(LANG_EN_CONFIG)
 
-            return
 
-        }
-        else {
-
-             interaction.channel.threads.create({
-                name: "Object's chat thread",
-                autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
-                reason: "image's thread",
-            });
-
-            return
-        }
+        await interaction.channel.threads.create({
+            name: config.thread_title,
+            autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
+            reason: config.thread_title,
+        });
 
         
     }

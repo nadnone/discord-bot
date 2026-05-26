@@ -19,5 +19,8 @@
     "warning": "Attention, je t'ai à l'oeil. (motif:",
     "warnlist_1": "Liste des cartons jaunes",
     "warnlist_2": "La liste de toutes les bétises qu'a fait la personne demandée",
-    "motif": "Motif"
+    "motif": "Motif",
+    "thread_title": "Discussion sur l'objet",
+    "linkassasssin_detected": "Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande d'avertir la modération.",
+    "linkassassin_report": "Envoie des liens non authorisés :"
 }

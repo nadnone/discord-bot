@@ -1,7 +1,7 @@
 import { exec } from 'node:child_process';
 import banUser from './ban.js';
 import fs from 'node:fs';
-import { WARNJSONFILE, WARNS_BEFORE_BAN } from './constants.js';
+import { WARNS_BEFORE_BAN } from './constants.js';
  
 export default async function pardon(cible, serverID, db) {
 

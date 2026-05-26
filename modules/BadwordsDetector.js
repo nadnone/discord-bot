@@ -1,7 +1,7 @@
 import { ActivityType } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
-import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_API_EN, BADWORDS_LIST_API_FR, DATABASE_CHECK, DB_SERVERS_KEYS } from "../tools/constants.js";
+import { ALLOWERBARDWORDSFILE, BADWORDS_LIST_EN, BADWORDS_LIST_FR, DATABASE_CHECK, DB_SERVERS_KEYS } from "../tools/constants.js";
 
 export default class BadwordsDetector {
 
@@ -13,8 +13,8 @@ export default class BadwordsDetector {
     }
 
     async _init() {
-        this.blacklist_FR = await (await fetch(BADWORDS_LIST_API_FR)).text()
-        this.blacklist_EN = await (await fetch(BADWORDS_LIST_API_EN)).text()
+        this.blacklist_FR = await (await fetch(BADWORDS_LIST_FR)).text()
+        this.blacklist_EN = await (await fetch(BADWORDS_LIST_EN)).text()
         
         this.blacklist_FR = await this.blacklist_FR.toString().split("\n");
         this.blacklist_EN = await this.blacklist_EN.toString().split("\n");

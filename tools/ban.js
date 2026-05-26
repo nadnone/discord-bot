@@ -1,5 +1,3 @@
-import { exec } from 'node:child_process';
-import ban from '../commands/moderation/ban.js';
 
 export default async function banUser(cible, motif, interaction) {
 

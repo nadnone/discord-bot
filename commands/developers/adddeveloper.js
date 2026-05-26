@@ -35,7 +35,7 @@ export default {
         }
         catch (e) 
         {
-            console.log(`Error code : ${e.code} -> adddevelopers.js`);
+            console.log(`Error code : ${e.code} -> cmds/adddevelopers.js`);
         }
     
 
