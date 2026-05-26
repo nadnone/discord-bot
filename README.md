@@ -1,4 +1,4 @@
-## Un bot random
+## Juste un bot chill
 ----------
 
 Ce bot peut filtrer les liens, les fichiers et les insultes par rapport à des listes.
@@ -9,15 +9,15 @@ Il peut aussi nettoyer des messages par salon ou pour le serveur entier avec Net
 
 Des commandes pour les opérateurs (developeurs) sont aussi disponibles pour redémarrer, mettre à jour, sauvegarder les données du bot ou encore enregister un nouveau serveur
 
-### - Partially support English
+### - [Partially support English](./README_EN.md)
 
-### Le bot est en utilisation privée sous un serveur donné :
+### Le bot est en utilisation privée sous les serveurs donnés :
 -----------
 
 - [Lien d'invitation Discord]( https://discord.gg/2gRurtqTsj )
 - (Un autre serveur privé sans lien)
 
-### Credits
+### Remerciements
 -----------
 
 - @darwiin (Maurice Butler) pour la liste des insultes en français https://github.com/darwiin/french-badwords-list
