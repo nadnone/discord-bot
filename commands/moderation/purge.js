@@ -66,7 +66,7 @@ export default {
 
 				const editReply =`${demandeFrom} Purge de`
 
-				const allmsgs = await channel[1].messages.fetch({limit: 100, cache: false})
+				const allmsgs = await channel[1].messages.fetch({limit: 100, cache: false, force: true})
 
 				const msgs = allmsgs.filter(m => m.author.id === cibleID && m.deletable === true && m.content !== replymsg);
 

@@ -22,10 +22,10 @@ export default class ImagesKiller {
         const rules = this.db.get_images_rules(channelId, serverID);
         if (rules == null) return false;
 
+        for (const type of JSON.parse(rules.formats)) {
 
-        for (const type of rules.formats) {
+            const isImage = await message.attachments.find(c => c.contentType.includes(type)) != null 
 
-            const isImage = await message.attachments.find(c => c.contentType.includes(type)) != null
             if (isImage) 
             {
                 await interaction.delete();
