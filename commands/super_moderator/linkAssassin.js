@@ -154,7 +154,8 @@ export default {
 
 
 			const lang = db.get_servers(DB_SERVERS_KEYS.language, serverID);
-			
+			if (lang == null) return
+
 			let config = null;
 			if (lang.language === "FR")
 				config = await db.read(LANG_FR_CONFIG);

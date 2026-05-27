@@ -146,7 +146,8 @@ export default class LinkAssassin {
         // on prend la whitelist par défaut
         const defaultwl = await this.db.read(WHITELISTFILE);
         if (whitelist == null) whitelist = {"addresses": defaultwl};
-        else whitelist.addresses.concat(defaultwl);
+        else whitelist.addresses = JSON.parse(whitelist.addresses).concat(defaultwl);
+
 
         // dernier teste de whitelist avant le gros teste de blacklist
         if (whitelist.addresses.includes(nude_link)) return
