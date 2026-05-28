@@ -2,6 +2,7 @@ import { ActivityType, MessageFlags } from "discord.js";
 import warnUser from "../tools/warn.js";
 import fs from "node:fs";
 import { BLACKLISTFILE, BLACKLISTSFWFILE, DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, LOGCOMMITSFILE, WHITELISTFILE } from "../tools/constants.js";
+import { binary_search } from "../tools/binary_search.js";
 
 export default class LinkAssassin {
 
@@ -180,13 +181,20 @@ export default class LinkAssassin {
                             .replaceAll("|", "")
                             .replaceAll("/", "")
                             .replaceAll("^", "")
-                            .trim()
-            
+                            .trim().split("\n")
+
+
+
+
+                if (binary_search(rslt, nude_link))
+                {
+                    await interaction.delete();
+                    await interaction.author.send(config.linkassasssin_detected + " -> " + nude_link);
+                    await warnUser(interaction.member, `${config.linkassassin_report} ${nude_link}`, interaction, this.db);
+                    return true
+
+                }
               
-                await interaction.reply({content: config.linkassasssin_detected, flag: MessageFlags.Ephemeral});
-                await warnUser(interaction.member, `${config.linkassassin_report} ${nude_link}`, interaction, this.db);
-                await interaction.delete();
-                return true
         }
 
 

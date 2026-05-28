@@ -21,7 +21,7 @@
     "warnlist_2": "La liste de toutes les bétises qu'a fait la personne demandée",
     "motif": "Motif",
     "thread_title": "Discussion sur l'objet",
-    "linkassasssin_detected": "Lien bizarre detecté, supprimé. U_u, si c'est un faux positif, je te recommande d'avertir la modération.",
+    "linkassasssin_detected": "Tu reçois ce message car un ien bizarre de ta part a été detecté et supprimé. Si c'est un faux positif, je te recommande d'avertir la modération.",
     "linkassassin_report": "Envoie des liens non authorisés :",
     "ping": "Je suis vivant ! (v1.0)",
     "info_first_message": "Alors comme ca tu veux me stalk ? O_O",
