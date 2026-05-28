@@ -44,7 +44,7 @@ export default {
 					.setDescription("La liste des adresses autorisées (ou non avec '!') -> exemple: google.com, !youtube.com, example.com")
 					.setRequired(false))
 			.addBooleanOption(option => 
-				option.setName("all")
+				option.setName("blockall")
 					.setDescription("True : Bloquer tous les liens; False : Filtrer normalement")
 					.setRequired(false)),
 
@@ -55,7 +55,7 @@ export default {
             const enabled = await interaction.options.getBoolean("enable");
             const serverID = await interaction.guildId.toString();
 			const channel = await interaction.options.getChannel("channel");
-			const alllink = await interaction.options.getBoolean("all");
+			const alllink = await interaction.options.getBoolean("blockall");
 			const whitelist = await interaction.options.getString("whitelist");
 
 

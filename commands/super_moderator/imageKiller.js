@@ -4,7 +4,7 @@ import { DB_SERVERS_KEYS, LANG_EN_CONFIG, LANG_FR_CONFIG, PERMISSIONS, SUPPORTED
 
 export default {
 	permissions: PERMISSIONS.SUPER_MODERATOR,
-	data: new SlashCommandBuilder().setName('imagekiller')
+	data: new SlashCommandBuilder().setName('imageskiller')
 			.setDescription("Gérer le service ImageKiller")
 			.addBooleanOption((option) =>
 				option.setName("enable")

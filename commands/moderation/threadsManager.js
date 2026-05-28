@@ -13,7 +13,7 @@ export default {
                 .setDescription("Le salon que tu souhaites ajouter ou supprimer")
                 .setRequired(true)
 			).addBooleanOption(option => 
-                option.setName("choix")
+                option.setName("enable")
                 .setDescription("True : Ajouter, False: Supprimer")
                 .setRequired(true)
             ),
@@ -21,7 +21,7 @@ export default {
 
         try {
 
-            const choice = interaction.options.getBoolean("choix");
+            const choice = interaction.options.getBoolean("enable");
             const channel = interaction.options.getChannel("channel");
             const serverID = interaction.guildId.toString();
 
