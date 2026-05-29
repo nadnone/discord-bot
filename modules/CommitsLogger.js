@@ -16,61 +16,71 @@ export default class CommitsLogger {
         
         const commitsData = JSON.parse(fs.readFileSync(LOGCOMMITSFILE));
 
-        exec("git fetch https://github.com/nadnone/discord-bot.git && git log -n 1", async (error, stdout, stderr) => {
+        try {
+            
+                exec("git fetch https://github.com/nadnone/discord-bot && git log -n 1", async (error, stdout, stderr) => {
 
-            if (error) {
-                console.log(error.message);
-            }
-            else {
-
-                const commit = stdout.split("\n")
-
-                const author = commit[1].replace("Author: ", "").split(" ")[0].trim();
-                const date = new Date(commit[2].replace("Date: ", ""));
-                const fields = commit.splice(5);
-                const title = commit[4].trim()
-
-
-                const lastcommit = commitsData.filter(el => el.title === title && el.fields === fields.join("\n").trim() && el.author === author)
-                
-                if (lastcommit.length > 0) 
-                {
-                    this.check_anyway = false;
-                    return
+                if (error) {
+                    console.log(error.message);
                 }
+                else {
 
-                let embed = new EmbedBuilder()
-                            .setAuthor({name: author})
-                            .setTitle(title)
+                    const commit = stdout.split("\n")
 
-                for (let i = 0; i < fields.length; i++) {
-
-                    embed.addFields({name: "", value: fields[i].trim()});
-
-                }
+                    const author = commit[1].replace("Author: ", "").split(" ")[0].trim();
+                    const date = new Date(commit[2].replace("Date: ", ""));
+                    const fields = commit.splice(5);
+                    const title = commit[4].trim()
 
 
-                const channels = await client.channels.cache.forEach(async (chan) => {
-                    if (chan.name === UPDATES_ROOM_NAME
-                    ){
-                            chan.send({embeds: [embed]})
+                    const lastcommit = commitsData.filter(el => el.title === title && el.fields === fields.join("\n").trim() && el.author === author)
+                    
+                    if (lastcommit.length > 0) 
+                    {
+                        this.check_anyway = false;
+                        return
                     }
-                });
+
+                    let embed = new EmbedBuilder()
+                                .setAuthor({name: author})
+                                .setTitle(title)
+
+                    for (let i = 0; i < fields.length; i++) {
+
+                        embed.addFields({name: "", value: fields[i].trim()});
+
+                    }
 
 
-                let newcommmit = [] // on efface pour n'avoir qu'un seul element : TODO à revoir
-                newcommmit.push({
-                    title: title,
-                    fields: fields.join("\n").trim(),
-                    author: author
-                });
+                    const channels = await client.channels.cache.forEach(async (chan) => {
+                        if (chan.name === UPDATES_ROOM_NAME
+                        ){
+                                chan.send({embeds: [embed]})
+                        }
+                    });
 
-                fs.writeFileSync(LOGCOMMITSFILE, JSON.stringify(newcommmit));
-                
 
-            }
-                
-        })
+                    let newcommmit = [] // on efface pour n'avoir qu'un seul element : TODO à revoir
+                    newcommmit.push({
+                        title: title,
+                        fields: fields.join("\n").trim(),
+                        author: author
+                    });
+
+                    fs.writeFileSync(LOGCOMMITSFILE, JSON.stringify(newcommmit));
+                    
+
+                }
+                    
+            })
+
+
+        } catch (e) {
+            console.log(`${e} -> CommitsLogger.js`);
+            
+        }
+
+      
 
     }
 }
