@@ -24,17 +24,26 @@ export default class MessagesManager {
 
         client.on(Events.MessageCreate, async (interaction) => {
 
-            const server = await this.db.get_servers(DB_SERVERS_KEYS.serverID, await interaction.guildId.toString());
-            if (server == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
+            try {
+                const server = await this.db.get_servers(DB_SERVERS_KEYS.serverID, await interaction.guildId.toString());
+                if (server == null) return // si le serveur n'est pas enregistré, pas de fonctions suivantes
 
-            let bad = await this.addr_checker.check(interaction, activityPresence) 
-                bad &= await this.swearsChecker.check(interaction, activityPresence)
-                bad &= await this.imagesKiller.check(interaction, activityPresence)
-            
-            if (bad === true) return;
-            
-            this.quoifeurDetector.check(interaction, activityPresence);
-            this.threadsManager.check(interaction, activityPresence);
+                let bad = await this.addr_checker.check(interaction, activityPresence) 
+                    bad &= await this.swearsChecker.check(interaction, activityPresence)
+                    bad &= await this.imagesKiller.check(interaction, activityPresence)
+                
+                if (bad === true) return;
+                
+                this.quoifeurDetector.check(interaction, activityPresence);
+                this.threadsManager.check(interaction, activityPresence);     
+
+
+            } catch (e) {
+                console.log(`${e} -> events/MessagesManager.js`);
+                
+            }
+
+           
         });
     
     

@@ -4,6 +4,7 @@ import path from "node:path";
 import backup from "./backup.js";
 import { DatabaseSync } from "node:sqlite";
 import { argv } from "node:process";
+import { BADWORDS_LIST_EN, BADWORDS_LIST_FR, BADWORDSFILEEN, BADWORDSFILEFR } from "./constants.js";
 
 export default function update(dirname) {
 
@@ -157,11 +158,35 @@ function init(db) {
         }
 
 
+
+        loadBlacklists()
+
+
         return true;
 
     } catch (e) {
         console.log(`${e} -> tools/deployement.js:init()`);
         
     }
+
+}
+
+
+async function loadBlacklists() {
+    
+        let data = null
+
+        console.log("Téléchargement des blacklists");
+
+        data = await fetch(BADWORDS_LIST_EN);
+        data = await data.text()
+        
+        fs.writeFileSync(BADWORDSFILEEN, data);
+        
+        data = await fetch(BADWORDS_LIST_FR);
+        data = await data.text()
+        
+        fs.writeFileSync(BADWORDSFILEFR, data);
+
 
 }

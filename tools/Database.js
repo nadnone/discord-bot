@@ -204,6 +204,10 @@ export default class Database {
         await fs.writeFileSync(context, data);
     }
 
+    read_text(context) {
+        return fs.readFileSync(context);
+    }
+
     read(context) {
         return JSON.parse(fs.readFileSync(context));
     }

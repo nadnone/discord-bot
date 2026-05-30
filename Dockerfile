@@ -1,7 +1,7 @@
 FROM docker.io/alpine:edge
 
 RUN apk update && apk upgrade
-RUN apk add git nodejs npm
+RUN apk add git nodejs npm zip
 
 RUN mkdir /app
 RUN cd /app && git clone https://github.com/nadnone/discord-bot
